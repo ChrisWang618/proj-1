@@ -580,8 +580,8 @@ const submitButton = document.getElementById('submitButton');
     .then(result => {
         alert(result);
 
-        // 重設所有數量欄位的值為 0
-        document.querySelectorAll('input[type="number"]').forEach(input => input.value = 0);
+        // 重設所有數量欄位的值為空白
+        document.querySelectorAll('input[type="number"]').forEach(input => input.value = "");
     })
     .catch(error => console.error("錯誤:", error));
 }
