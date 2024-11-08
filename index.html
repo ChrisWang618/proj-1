@@ -1184,6 +1184,13 @@
         </div> -->
 
         <button type="submit">提交訂單</button>
+		<script>
+    let submitButton = document.getElementById('submitButton');
+    submitButton.addEventListener('click', function(event) {
+        submitButton.disabled = true;  // 禁用按鈕
+        setTimeout(() => submitButton.disabled = false, 5000);  // 5秒後啟用按鈕
+    });
+</script>
     </form>
 
 </body>
