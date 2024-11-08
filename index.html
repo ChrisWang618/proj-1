@@ -1185,15 +1185,6 @@
 
         <button type="submit">提交訂單</button>
     </form>
-	<script>
-    document.querySelector('button[type="submit"]').addEventListener('click', function(event) {
-        const submitButton = event.target;
-        submitButton.disabled = true;  // 禁用按鈕
 
-        setTimeout(function() {
-            submitButton.disabled = false;  // 5秒後啟用按鈕
-        }, 5000);  // 5000毫秒，即5秒
-    });
-	</script>
 </body>
 </html>
