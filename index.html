@@ -554,6 +554,12 @@
             categoryList.appendChild(newRow);
         }
 
+    let submitButton = document.getElementById('submitButton');
+    submitButton.addEventListener('click', function(event) {
+        submitButton.disabled = true;  // 禁用按鈕
+        setTimeout(() => submitButton.disabled = false, 5000);  // 5秒後啟用按鈕
+    });
+
         function submitForm() {
     const formData = new FormData(document.getElementById('orderForm'));
 
@@ -1184,13 +1190,7 @@
         </div> -->
 
 <button type="submit" id="submitButton">提交訂單</button>
-		<script>
-    let submitButton = document.getElementById('submitButton');
-    submitButton.addEventListener('click', function(event) {
-        submitButton.disabled = true;  // 禁用按鈕
-        setTimeout(() => submitButton.disabled = false, 5000);  // 5秒後啟用按鈕
-    });
-</script>
+		
     </form>
 
 </body>
