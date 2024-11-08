@@ -561,6 +561,8 @@
     });
 
         function submitForm() {
+		        event.preventDefault();  // 防止表單自動提交
+
     const formData = new FormData(document.getElementById('orderForm'));
 
     // 直接將陣列轉為字符串
