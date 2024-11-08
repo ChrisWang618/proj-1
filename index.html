@@ -554,11 +554,14 @@
             categoryList.appendChild(newRow);
         }
 
-       function submitForm(event) {
-    event.preventDefault();  // 防止表單自動提交
-    submitButton.disabled = true;  // 禁用按鈕
-    setTimeout(() => submitButton.disabled = false, 5000);  // 5秒後啟用按鈕
 
+
+        function submitForm() {
+		        event.preventDefault();  // 防止表單自動提交
+const submitButton = document.getElementById('submitButton');
+            submitButton.disabled = true;  // 禁用按鈕
+            setTimeout(() => submitButton.disabled = false, 5000);  // 5秒後啟用按鈕
+			
     const formData = new FormData(document.getElementById('orderForm'));
 
     // 直接將陣列轉為字符串
