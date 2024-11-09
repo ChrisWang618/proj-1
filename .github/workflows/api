@@ -1,20 +1,27 @@
-name: Deploy API Integration
+name: Deploy Project
 
-on: 
+on:
   push:
     branches:
       - main
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Check out repository
+        uses: actions/checkout@v2
 
-    - name: Set environment variable from secret
-      run: echo "API_URL=${{ secrets.API_URL }}" >> $GITHUB_ENV
+      - name: Install dependencies
+        run: npm install
 
-    - name: Use API URL
-      run: curl -X POST $API_URL
+      - name: Replace API URL in JavaScript
+        run: |
+          sed -i 's|<API_URL_PLACEHOLDER>|${{ secrets.API_URL }}|g' /path/to/your/script.js
+
+      - name: Build project
+        run: npm run build
+
+      - name: Deploy
+        run: npm run deploy
