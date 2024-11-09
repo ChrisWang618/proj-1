@@ -16,8 +16,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Set API URL as environment variable
+        run: echo "API_URL=${{ secrets.API_URL }}" >> $GITHUB_ENV
+
       - name: Replace API URL in HTML
-        run: sed -i 's|<API_URL_PLACEHOLDER>|${{ secrets.API_URL }}|g' index.html
+        run: sed -i 's|<API_URL_PLACEHOLDER>|$API_URL|g' index.html
 
       - name: Build project
         run: npm run build
