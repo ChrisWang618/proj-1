@@ -580,6 +580,7 @@ const submitButton = document.getElementById('submitButton');
     })
     .then(response => response.text())
     .then(result => {
+	        console.log(result);  // 打印伺服器回應內容
         alert(result);
 
         // 重設所有數量欄位的值為空白
