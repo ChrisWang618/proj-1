@@ -572,7 +572,9 @@ const submitButton = document.getElementById('submitButton');
     formData.set("health_product[]", healthProducts); 
     formData.set("skincare_product[]", skincareProducts);
 
-    fetch("https://script.google.com/macros/s/AKfycbxM02-qa4fHwGo-oSvftdq_kMktuTOHD7BC6GfD7chbsmH2Nb_nvQ6Nl6HvZa4vv891TQ/exec", {
+    const apiUrl = process.env.API_URL || "https://default-api-url.com"; // 預設 URL
+		
+    fetch(apiUrl, {
         method: "POST",
         body: formData
     })
