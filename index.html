@@ -572,7 +572,7 @@ const submitButton = document.getElementById('submitButton');
     formData.set("health_product[]", healthProducts); 
     formData.set("skincare_product[]", skincareProducts);
 
-const apiUrl = "<API_URL_PLACEHOLDER>";
+    const apiUrl = "<API_URL_PLACEHOLDER>"; // 這會在 GitHub Actions 中被替換為實際的 API URL
 		
     fetch(apiUrl, {
         method: "POST",
