@@ -80,7 +80,7 @@
         console.log(pair[0] + ': ' + pair[1]);
     }
 
-    fetch("https://script.google.com/macros/s/AKfycbzeg8OcBx5ljK5ig27oFsi5trh-2cJPx_gRRL18wasvpnVKPvJb9ee6VbCH2f6qM382Bg/exec", {
+    fetch("https://script.google.com/macros/s/AKfycbz7J26R2-UdgLWrO6yJFEs8zX4CzSQdlcpr_wrWIbpR0bt9_8W0ySmWUMfB0JG7AuEQpA/exec", {
         method: "POST",
         body: formData
     })
@@ -99,6 +99,8 @@
         updateTotalPV();  // 更新總PV顯示為 0
     })
     .catch(error => console.error("錯誤:", error));
+
+
 	
         }
 		// 更新總PV數值

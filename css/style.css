@@ -1,0 +1,68 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: auto;
+    min-height: 100vh;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+body {
+    background-color: #f7f7f7;
+    font-family: Arial, sans-serif;
+    display: block; /* 改為 block，取消居中對齊 */
+    padding-left: 20px; /* 在左側添加間距 */
+}
+
+.container {
+    width: 100%;
+    max-width: 800px;
+    padding: 20px;
+    margin-bottom: 20px;
+    background-color: #fff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    border: 2px solid #007BFF; /* 添加整體藍色邊框 */
+}
+
+.form-group {
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: row;  /* 讓 label 和 input 在同一行 */
+    align-items: center;
+    justify-content: flex-start;  /* 靠左對齊 */
+}
+
+.form-group label {
+    width: 120px;  /* 固定標籤寬度 */
+    text-align: left;  /* 標籤文字左對齊 */
+}
+
+.form-group input {
+    flex: none;  /* 輸入框佔滿剩餘空間 */
+    margin-left: 10px;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+
+button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+.add-product-btn, .remove-btn {
+    padding: 5px 10px;
+    font-size: 14px;  /* 調整字體大小 */
+}
