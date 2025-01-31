@@ -5,8 +5,15 @@
     <link rel="stylesheet" href="css/style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>商品訂購表單</title>
+    
+    <!-- 引入 Select2 的 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+
+    <!-- 引入 jQuery 和 Select2 的 JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+    
     <script>
-        // 每個類別的 API URL
         const SHEET_URLS = {
             onsale: "https://sheets.googleapis.com/v4/spreadsheets/1bjj-EA8Snl6bxIH5Jn2u7OS8XAqy7LgQKRjhDPzE2c4/values/韓國站優惠商品?key=AIzaSyAq756oYehEuoYdFoai3axSGz7_adOooac",
             health: "https://sheets.googleapis.com/v4/spreadsheets/1bjj-EA8Snl6bxIH5Jn2u7OS8XAqy7LgQKRjhDPzE2c4/values/健康食品?key=AIzaSyAq756oYehEuoYdFoai3axSGz7_adOooac",
@@ -16,32 +23,28 @@
             food: "https://sheets.googleapis.com/v4/spreadsheets/1bjj-EA8Snl6bxIH5Jn2u7OS8XAqy7LgQKRjhDPzE2c4/values/吃吃喝喝?key=AIzaSyAq756oYehEuoYdFoai3axSGz7_adOooac"
         };
 
-        // 通用的函數來從 Google Sheets 讀取資料並填充對應的選項
-        function fetchProductsFromGoogleSheets(sheetName, selector) {
+       function fetchProductsFromGoogleSheets(sheetName, selector) {
     fetch(SHEET_URLS[sheetName])
         .then(response => response.json())
         .then(data => {
-            // 提取對應欄位的所有選項（假設第一欄是商品名，第二欄是商品詳細信息）
             const products = data.values.slice(1).map(row => ({
-                name: row[2],         // 商品名稱
-                details: row[3]       // 商品詳細信息（如價格、PV等）
+                name: row[2],
+                details: row[3],
+                pv: row[8]  // 假設 PV 數值在第四列 (從0開始計算)
             }));
 
-            // 生成 option 元素的 HTML 字符串
             const options = products.map(product => 
-                `<option value="${product.name}">${product.name} (${product.details})</option>`
+                `<option value="${product.name}" data-pv="${product.pv}">${product.name} (${product.details})</option>`
             ).join('');
 
-            // 將選項填充到指定的 select 元素中
-            document.querySelectorAll(selector)
-                .forEach(select => {
-                    select.innerHTML = `<option value="" selected>請選擇商品</option>` + options;
-                });
+            document.querySelectorAll(selector).forEach(select => {
+                select.innerHTML = `<option value="" selected>請選擇商品</option>` + options;
+                $(select).select2();  // 啟用 Select2 搜尋功能
+            });
         })
         .catch(error => console.error("無法獲取產品資料:", error));
 }
 
-        // 當頁面加載完成後調用這個函數
         window.onload = function() {
             fetchProductsFromGoogleSheets('onsale', 'select[name="onsale_product[]"]');
             fetchProductsFromGoogleSheets('health', 'select[name="health_product[]"]');
@@ -51,36 +54,131 @@
             fetchProductsFromGoogleSheets('food', 'select[name="food_product[]"]');
         };
 
+
         // 表單提交處理
-        function submitForm(event) {
-            event.preventDefault();  // 防止表單自動提交
-            const submitButton = document.getElementById('submitButton');
-            submitButton.disabled = true;  // 禁用按鈕
-            setTimeout(() => submitButton.disabled = false, 5000);  // 5秒後啟用按鈕
+      function submitForm(event) {
+    event.preventDefault();  // 防止表單自動提交
+    const submitButton = document.getElementById('submitButton');
+    submitButton.disabled = true;  // 禁用按鈕
+    setTimeout(() => submitButton.disabled = false, 5000);  // 5秒後啟用按鈕
 
-            const formData = new FormData(document.getElementById('orderForm'));
+    const formData = new FormData(document.getElementById('orderForm'));
 
-            // 直接將陣列轉為字符串
-            const healthProducts = formData.getAll("health_product[]").join(','); 
-            const skincareProducts = formData.getAll("skincare_product[]").join(',');
+    // 取得訂單明細表格中的所有商品與數量
+    let orderSummary = [];
+    document.querySelectorAll("#summaryTable tbody tr").forEach(row => {
+        const productName = row.children[0].innerText;  // 商品名稱
+        const quantity = row.children[1].innerText;     // 數量
+        orderSummary.push(`${productName} x ${quantity}`);
+    });
 
-            // 設置新的值
-            formData.set("health_product[]", healthProducts); 
-            formData.set("skincare_product[]", skincareProducts);
+    // 將訂單明細加入 FormData
+    formData.append("order_summary", orderSummary.join("; ")); 
 
-            fetch("https://script.google.com/macros/s/AKfycbxnoBvCJzEA6U7qjuy_06KdOy7JAd7_GmSBvW93GUYHL_TyHPHIMwDGWmcTUK-XV3X0sA/exec", {
-                method: "POST",
-                body: formData
-            })
-            .then(response => response.text())
-            .then(result => {
-                alert(result);
+    // 打印 FormData 中的所有值以確保資料正確
+    for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+    }
 
-                // 重設所有數量欄位的值為空白
-                document.querySelectorAll('input[type="number"]').forEach(input => input.value = "");
-            })
-            .catch(error => console.error("錯誤:", error));
+    fetch("https://script.google.com/macros/s/AKfycbz7J26R2-UdgLWrO6yJFEs8zX4CzSQdlcpr_wrWIbpR0bt9_8W0ySmWUMfB0JG7AuEQpA/exec", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.text())
+    .then(result => {
+        alert(result);
+
+        // 重設所有數量欄位的值為空白
+        document.querySelectorAll('input[type="number"]').forEach(input => input.value = "");
+        
+        // 清空訂單明細表格
+        document.querySelector("#summaryTable tbody").innerHTML = "";
+		
+		// 重置總PV數值
+        totalPV = 0;
+        updateTotalPV();  // 更新總PV顯示為 0
+    })
+    .catch(error => console.error("錯誤:", error));
+
+
+	
         }
+		// 更新總PV數值
+let totalPV = 0;  // 移到全域範圍，讓它不會每次加入商品時被重置
+
+function addProductToSummary() {
+    const categories = ["onsale", "health", "skincare", "body", "living", "food"];
+    
+    categories.forEach(category => {
+        document.querySelectorAll(`select[name="${category}_product[]"]`).forEach(select => {
+            const productName = select.value;
+            const quantityInput = select.closest(".productRow").querySelector(`input[name="${category}_quantity[]"]`);
+            
+            if (productName && quantityInput && parseInt(quantityInput.value) > 0) {
+                const productOption = Array.from(select.options).find(option => option.value === productName);
+                const pvValue = parseInt(productOption.getAttribute("data-pv")) || 0;
+
+                // 創建新行並更新訂單明細
+                const row = document.createElement("tr");
+                row.innerHTML = ` 
+                    <td>${productName}</td>
+                    <td>${quantityInput.value}</td>
+                    <td>${pvValue}</td>
+                    <td><button type="button" class="remove-btn">❌</button></td>
+                `;
+                document.querySelector("#summaryTable tbody").appendChild(row);
+
+                totalPV += pvValue * parseInt(quantityInput.value);  // 累加到總PV數值
+
+                row.querySelector(".remove-btn").addEventListener("click", function() {
+                    removeProduct(this, pvValue, quantityInput.value);  // 綁定移除功能，並更新總PV
+                });
+
+                // 清空選擇的商品和數量欄位
+                select.value = "";
+                quantityInput.value = "";
+            }
+        });
+    });
+
+    updateTotalPV();  // 顯示更新後的總PV數值
+}
+
+// 更新總PV數值
+function updateTotalPV() {
+    let totalPVElem = document.getElementById("totalPV");
+    if (!totalPVElem) {
+        totalPVElem = document.createElement("p");
+        totalPVElem.id = "totalPV";
+        document.querySelector("#orderSummary").appendChild(totalPVElem);
+    }
+    totalPVElem.innerHTML = `總計 PV: ${totalPV}`;
+}
+
+
+
+
+// 移除商品的方法
+function removeProduct(button) {
+    const row = button.closest("tr");
+
+    // 獲取該行的 PV 和數量
+    const pvValue = parseInt(row.children[2].innerText) || 0;  // PV 數值
+    const quantity = parseInt(row.children[1].innerText) || 0; // 數量
+
+    // 減去移除商品的PV
+    totalPV -= pvValue * quantity;
+
+    // 顯示更新後的總PV
+    updateTotalPV();
+
+    // 刪除該行
+    row.remove();
+}
+
+
+
+
     </script>
 </head>
 <body>
@@ -124,6 +222,25 @@
             <input type="text" id="rlinename" name="rlinename" required>
         </div>
 
+<div id="orderSummary">
+    <h3>訂單明細</h3>
+    <table id="summaryTable" border="1">
+        <thead>
+            <tr>
+                <th>商品名稱</th>
+                <th>數量</th>
+                <th>PV數值</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 這裡會動態添加選擇的商品 -->
+        </tbody>
+    </table>
+    <!-- 顯示總PV數值 -->
+    <p id="totalPV">總計 PV: 0</p>
+</div>
+
 
         <!-- 優惠組 Category -->
         <h3>優惠組</h3>
@@ -135,6 +252,8 @@
                     </select>
                 </label>
                 <label>數量: <input type="number" name="onsale_quantity[]" min="1" placeholder="數量"></label>
+				        <button type="button" class="add-product-btn" onclick="addProductToSummary()">加入</button>
+
             </div>
         </div>
 
@@ -148,6 +267,8 @@
                     </select>
                 </label>
                 <label>數量: <input type="number" name="health_quantity[]" min="1" placeholder="數量"></label>
+				        <button type="button" class="add-product-btn" onclick="addProductToSummary()">加入</button>
+
             </div>
         </div>
 
@@ -161,6 +282,8 @@
                     </select>
                 </label>
                 <label>數量: <input type="number" name="skincare_quantity[]" min="1" placeholder="數量"></label>
+				        <button type="button" class="add-product-btn" onclick="addProductToSummary()">加入</button>
+
             </div>
         </div>
 
@@ -174,6 +297,8 @@
                     </select>
                 </label>
                 <label>數量: <input type="number" name="body_quantity[]" min="1" placeholder="數量"></label>
+				        <button type="button" class="add-product-btn" onclick="addProductToSummary()">加入</button>
+
             </div>
         </div>
 
@@ -187,6 +312,8 @@
                     </select>
                 </label>
                 <label>數量: <input type="number" name="living_quantity[]" min="1" placeholder="數量"></label>
+				        <button type="button" class="add-product-btn" onclick="addProductToSummary()">加入</button>
+
             </div>
         </div>
 
@@ -200,6 +327,8 @@
                     </select>
                 </label>
                 <label>數量: <input type="number" name="food_quantity[]" min="1" placeholder="數量"></label>
+				        <button type="button" class="add-product-btn" onclick="addProductToSummary()">加入</button>
+
             </div>
         </div>
 
