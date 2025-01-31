@@ -38,7 +38,7 @@
             ).join('');
 
             document.querySelectorAll(selector).forEach(select => {
-                select.innerHTML = `<option value="" selected>請選擇商品點選後可搜尋商品</option>` + options;
+                select.innerHTML = `<option value="" selected>請選擇商品，點選後可搜尋商品</option>` + options;
                 $(select).select2();  // 啟用 Select2 搜尋功能
             });
         })
