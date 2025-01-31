@@ -22,6 +22,7 @@ body {
     background-color: #fff;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
+    border: 2px solid #007BFF; /* 添加整體藍色邊框 */
 }
 
 .form-group {
@@ -38,13 +39,14 @@ body {
 }
 
 .form-group input {
-    flex: 1;  /* 輸入框佔滿剩餘空間 */
+    flex: none;  /* 輸入框佔滿剩餘空間 */
     margin-left: 10px;
     padding: 8px;
     font-size: 14px;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
+
 
 button {
     margin-top: 20px;
