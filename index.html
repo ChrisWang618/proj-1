@@ -133,7 +133,7 @@ function addProductToSummary() {
                 });
 
                 // 清空選擇的商品和數量欄位
-                select.value = "";
+                $(select).val(null).trigger("change"); // 清空 Select2 選擇框
                 quantityInput.value = "";
             }
         });
