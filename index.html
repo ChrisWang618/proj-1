@@ -38,7 +38,7 @@
             ).join('');
 
             document.querySelectorAll(selector).forEach(select => {
-                select.innerHTML = `<option value="" selected>請選擇商品</option>` + options;
+                select.innerHTML = `<option value="" selected>請選擇商品點選後可搜尋商品</option>` + options;
                 $(select).select2();  // 啟用 Select2 搜尋功能
             });
         })
@@ -187,7 +187,7 @@ function removeProduct(button) {
         <form>
         <div class="form-group">
             <label for="name">帳號:</label>
-            <input type="text" id="name" name="name" required>
+            <input type="text" id="name" name="name" placeholder="要入PV的帳號" required>
         </div>
 
         <div class="form-group">
@@ -196,9 +196,11 @@ function removeProduct(button) {
         </div>
 
         <div class="form-group">
-            <label for="rdate">PV日期(月/日):</label>
-            <input type="text" id="rdate" name="rdate" required>
-        </div>
+    <label for="rdate">PV日期(月/日):</label>
+    <input type="text" id="rdate" name="rdate" placeholder="格式: 01/31" required>
+</div>
+
+
 
         <div class="form-group">
             <label for="rname">收件人:</label>
@@ -212,13 +214,19 @@ function removeProduct(button) {
 
         <div class="form-group">
             <label for="raddress">收件門市/地址:</label>
-            <input type="text" id="raddress" name="raddress" required>
+            <input type="text" id="raddress" name="raddress" placeholder="超商名字或宅配地址" required>
         </div>
 
         <div class="form-group">
             <label for="rlinename">Line名稱:</label>
             <input type="text" id="rlinename" name="rlinename" required>
         </div>
+		
+		<style>
+    input::placeholder {
+        color: #aaa; /* 淺色字體 */
+    }
+</style>
 
 <div id="orderSummary">
     <h3>訂單明細</h3>
