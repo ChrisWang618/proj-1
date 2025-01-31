@@ -2,1204 +2,337 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>商品訂購表單</title>
+    
+    <!-- 引入 Select2 的 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+
+    <!-- 引入 jQuery 和 Select2 的 JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+    
     <script>
-        function addProductRow(category) {
-            const categoryList = document.getElementById(`${category}List`);
-            const newRow = document.createElement("div");
-            newRow.className = "productRow";
+        const SHEET_URLS = {
+            onsale: "https://sheets.googleapis.com/v4/spreadsheets/1bjj-EA8Snl6bxIH5Jn2u7OS8XAqy7LgQKRjhDPzE2c4/values/韓國站優惠商品?key=AIzaSyAq756oYehEuoYdFoai3axSGz7_adOooac",
+            health: "https://sheets.googleapis.com/v4/spreadsheets/1bjj-EA8Snl6bxIH5Jn2u7OS8XAqy7LgQKRjhDPzE2c4/values/健康食品?key=AIzaSyAq756oYehEuoYdFoai3axSGz7_adOooac",
+            skincare: "https://sheets.googleapis.com/v4/spreadsheets/1bjj-EA8Snl6bxIH5Jn2u7OS8XAqy7LgQKRjhDPzE2c4/values/保養彩妝?key=AIzaSyAq756oYehEuoYdFoai3axSGz7_adOooac",
+            body: "https://sheets.googleapis.com/v4/spreadsheets/1bjj-EA8Snl6bxIH5Jn2u7OS8XAqy7LgQKRjhDPzE2c4/values/身體髮膚?key=AIzaSyAq756oYehEuoYdFoai3axSGz7_adOooac",
+            living: "https://sheets.googleapis.com/v4/spreadsheets/1bjj-EA8Snl6bxIH5Jn2u7OS8XAqy7LgQKRjhDPzE2c4/values/生活用品?key=AIzaSyAq756oYehEuoYdFoai3axSGz7_adOooac",
+            food: "https://sheets.googleapis.com/v4/spreadsheets/1bjj-EA8Snl6bxIH5Jn2u7OS8XAqy7LgQKRjhDPzE2c4/values/吃吃喝喝?key=AIzaSyAq756oYehEuoYdFoai3axSGz7_adOooac"
+        };
 
-            const productSelect = document.createElement("select");
-            productSelect.name = `${category}_product[]`;
+       function fetchProductsFromGoogleSheets(sheetName, selector) {
+    fetch(SHEET_URLS[sheetName])
+        .then(response => response.json())
+        .then(data => {
+            const products = data.values.slice(1).map(row => ({
+                name: row[2],
+                details: row[3],
+                pv: row[8]  // 假設 PV 數值在第四列 (從0開始計算)
+            }));
 
-            if (category === "onsale") {
-                productSelect.innerHTML = `
-					<option value="蜂蜜飲4盒組共240包 (台灣帳號無法購買)">蜂蜜飲4盒組共240包 (台灣帳號無法購買)</option>
-					<option value="蜂蜜飲1盒組共120包 (台灣帳號無法購買)">蜂蜜飲1盒組共120包 (台灣帳號無法購買)</option>
-					<option value="優惠四入組 艾多美 rTG純素海藻omega3膠囊">優惠四入組 艾多美 rTG純素海藻omega3膠囊</option>
-					<option value="優惠四入組 艾多美 rTG魚油">優惠四入組 艾多美 rTG魚油</option>
-					<option value="優惠四入組 艾多美 胃健康日常護理">優惠四入組 艾多美 胃健康日常護理</option>
-					<option value="優惠四入組 艾多美 兒童益生菌">優惠四入組 艾多美 兒童益生菌</option>
-					<option value="活動商品 艾多美 蜂蜜飲1盒組共60包 (台灣帳號無法購買)">活動商品 艾多美 蜂蜜飲1盒組共60包 (台灣帳號無法購買)</option>
-					<option value="優惠組兩入組 艾多美 諾麗果汁隨身包">優惠組兩入組 艾多美 諾麗果汁隨身包</option>
-					<option value="艾多美 陶瓷鍋組（三個鍋子+鍋蓋+菜瓜布）">艾多美 陶瓷鍋組（三個鍋子+鍋蓋+菜瓜布）</option>
-					<option value="艾多美 清新防曬乳液三入組">艾多美 清新防曬乳液三入組</option>
-					<option value="優惠四入組 艾多美 女性益生菌">優惠四入組 艾多美 女性益生菌</option>
-					<option value="優惠組 艾多美 有機精油套組 買一送一">優惠組 艾多美 有機精油套組 買一送一</option>
-					<option value="優惠組 艾多美 有機精油 買一送一">優惠組 艾多美 有機精油 買一送一</option>
-					<option value="優惠組 艾多美 有機精油 買一送一">優惠組 艾多美 有機精油 買一送一</option>
-					<option value="優惠組 艾多美 有機精油 買一送一">優惠組 艾多美 有機精油 買一送一</option>
-					<option value="優惠三入組 艾多美 綜合能量飲 加送隨身杯">優惠三入組 艾多美 綜合能量飲 加送隨身杯</option>
-					<option value="艾多美 蜂蜜飲1盒組共30包 (台灣帳號無法購買)">艾多美 蜂蜜飲1盒組共30包 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝萃煥膚六部曲 送 凝萃煥膚安瓶">艾多美 凝萃煥膚六部曲 送 凝萃煥膚安瓶</option>
-					<option value="艾多美 髮根強健套組 送木梳">艾多美 髮根強健套組 送木梳</option>
-                    <!-- Add other onsale product options -->
-                `;
-            } else if (category === "health") {
-                productSelect.innerHTML = `
-                    <option value="艾多美 蜂蜜飲4盒組共240包 (台灣帳號無法購買)">艾多美 蜂蜜飲4盒組共240包 (台灣帳號無法購買)</option>
-					<option value="艾多美 蜂蜜飲1盒組共120包 (台灣帳號無法購買)">艾多美 蜂蜜飲1盒組共120包 (台灣帳號無法購買)</option>
-					<option value="艾多美 酸櫻桃果凍">艾多美 酸櫻桃果凍</option>
-					<option value="艾多美 複合護眼素 護眼寶">艾多美 複合護眼素 護眼寶</option>
-					<option value="艾多美 牛奶鈣片120片">艾多美 牛奶鈣片120片</option>
-					<option value="艾多美 有機高麗菜汁 100ml 30包">艾多美 有機高麗菜汁 100ml 30包</option>
-					<option value="艾多美 車前子膳食纖維隨手包(45包)">艾多美 車前子膳食纖維隨手包(45包)</option>
-					<option value="艾多美 兒童維生素軟糖">艾多美 兒童維生素軟糖</option>
-					<option value="艾多美 紅石榴凍(60包) (台灣帳號無法購買)">艾多美 紅石榴凍(60包) (台灣帳號無法購買)</option>
-					<option value="艾多美 紅景天(120顆) (台灣帳號無法購買)">艾多美 紅景天(120顆) (台灣帳號無法購買)</option>
-					<option value="艾多美 紅蔘果凍條(30入)">艾多美 紅蔘果凍條(30入)</option>
-					<option value="艾多美 紅蔘微粒(60入) (台灣帳號無法購買)">艾多美 紅蔘微粒(60入) (台灣帳號無法購買)</option>
-					<option value="艾多美 益生菌 (120入) (台灣帳號無法購買)">艾多美 益生菌 (120入) (台灣帳號無法購買)</option>
-					<option value="艾多美 高濃度魚油膠囊 (台灣帳號無法購買)">艾多美 高濃度魚油膠囊 (台灣帳號無法購買)</option>
-					<option value="艾多美 普洱茶 (台灣帳號無法購買)">艾多美 普洱茶 (台灣帳號無法購買)</option>
-					<option value="艾多美 棕櫚果膠囊 男士寶(90顆)">艾多美 棕櫚果膠囊 男士寶(90顆)</option>
-					<option value="艾多美 葉黃素(台灣帳號無法購買)">艾多美 葉黃素(台灣帳號無法購買)</option>
-					<option value="艾多美 蜂膠口腔噴霧(30ml*3) (台灣帳號無法購買)">艾多美 蜂膠口腔噴霧(30ml*3) (台灣帳號無法購買)</option>
-					<option value="艾多美 綜合穀物飲 (台灣帳號無法購買)">艾多美 綜合穀物飲 (台灣帳號無法購買)</option>
-					<option value="艾多美 維生素C(90入) (台灣帳號無法購買)">艾多美 維生素C(90入) (台灣帳號無法購買)</option>
-					<option value="艾多美 銀杏納豆(60顆)">艾多美 銀杏納豆(60顆)</option>
-					<option value="艾多美 鳳梨酵素(30入)">艾多美 鳳梨酵素(30入)</option>
-					<option value="艾多美 諾麗果汁 (台灣帳號無法購買)">艾多美 諾麗果汁 (台灣帳號無法購買)</option>
-					<option value="艾多美 MSM薑黃錠">艾多美 MSM薑黃錠</option>
-					<option value="艾多美 螺旋藻膠囊 (台灣帳號無法購買)">艾多美 螺旋藻膠囊 (台灣帳號無法購買)</option>
-					<option value="艾多美 女性更年期專用槐花女王膠囊 玫瑰女士寶">艾多美 女性更年期專用槐花女王膠囊 玫瑰女士寶</option>
-					<option value="艾多美 綜合B群">艾多美 綜合B群</option>
-					<option value="艾多美 綜合鈣片 180粒">艾多美 綜合鈣片 180粒</option>
-					<option value="艾多美 膠原蛋白飲">艾多美 膠原蛋白飲</option>
-					<option value="艾多美 兒童魚油(120顆)">艾多美 兒童魚油(120顆)</option>
-					<option value="艾多美 檸檬葉酸(60顆)">艾多美 檸檬葉酸(60顆)</option>
-					<option value="艾多美 繽紛多彩蔬果綜合維生素(240顆)">艾多美 繽紛多彩蔬果綜合維生素(240顆)</option>
-					<option value="艾多美 鐵粉">艾多美 鐵粉</option>
-					<option value="艾多美 蘋果多酚果凍條 (台灣帳號無法購買)">艾多美 蘋果多酚果凍條 (台灣帳號無法購買)</option>
-					<option value="艾多美 蜂膠軟糖">艾多美 蜂膠軟糖</option>
-					<option value="艾多美 美容果凍-葡萄柚">艾多美 美容果凍-葡萄柚</option>
-					<option value="艾多美 美容果凍-蘆薈">艾多美 美容果凍-蘆薈</option>
-					<option value="艾多美 女性益生菌">艾多美 女性益生菌</option>
-					<option value="艾多美 牛奶睡眠肽">艾多美 牛奶睡眠肽</option>
-					<option value="艾多美 生物素">艾多美 生物素</option>
-					<option value="艾多美 超級維他命C 2000">艾多美 超級維他命C 2000</option>
-					<option value="艾多美 益腦片">艾多美 益腦片</option>
-					<option value="艾多美 胃健康日常護理">艾多美 胃健康日常護理</option>
-					<option value="艾多美 兒童紅蔘">艾多美 兒童紅蔘</option>
-					<option value="艾多美血糖護理-巴拿巴與紅蔘">艾多美血糖護理-巴拿巴與紅蔘</option>
-					<option value="艾多美 3倍蛋白粉">艾多美 3倍蛋白粉</option>
-					<option value="艾多美 美容果凍-百香果">艾多美 美容果凍-百香果</option>
-					<option value="艾多美紅蔘精華液">艾多美紅蔘精華液</option>
-					<option value="艾多美 rTG魚油">艾多美 rTG魚油</option>
-					<option value="艾多美 奶昔隨手包裝15包(可可) (台灣帳號無法購買)">艾多美 奶昔隨手包裝15包(可可) (台灣帳號無法購買)</option>
-					<option value="艾多美 奶昔隨手包裝15包(南瓜)">艾多美 奶昔隨手包裝15包(南瓜)</option>
-					<option value="艾多美 奶昔隨手包裝15包(原味) (台灣帳號無法購買)">艾多美 奶昔隨手包裝15包(原味) (台灣帳號無法購買)</option>
-					<option value="艾多美 奶昔隨手包裝15包(綠茶) (台灣帳號無法購買)">艾多美 奶昔隨手包裝15包(綠茶) (台灣帳號無法購買)</option>
-					<option value="艾多美 桔梗水梨榲桲濃縮果汁">艾多美 桔梗水梨榲桲濃縮果汁</option>
-					<option value="艾多美 綜合能量飲(30條)">艾多美 綜合能量飲(30條)</option>
-					<option value="艾多美 諾麗果汁隨身包 (24包) (台灣帳號無法購買)">艾多美 諾麗果汁隨身包 (24包) (台灣帳號無法購買)</option>
-					<option value="艾多美 人參地黃活力飲(30條)">艾多美 人參地黃活力飲(30條)</option>
-					<option value="艾多美 SCI腸道益生菌">艾多美 SCI腸道益生菌</option>
-					<option value="艾多美 洋蔥甜菜汁">艾多美 洋蔥甜菜汁</option>
-					<option value="艾多美 大象黑蒜汁">艾多美 大象黑蒜汁</option>
-					<option value="艾多美 rTG純素海藻omega3膠囊">艾多美 rTG純素海藻omega3膠囊</option>
-					<option value="艾多美 兒童益生菌">艾多美 兒童益生菌</option>
-					<option value="艾多美 大黃皇后膠囊">艾多美 大黃皇后膠囊</option>
-					<option value="艾多美 奶昔大包裝1200g (可可)">艾多美 奶昔大包裝1200g (可可)</option>
-					<option value="艾多美 奶昔大包裝1200g (南瓜)">艾多美 奶昔大包裝1200g (南瓜)</option>
-					<option value="艾多美 奶昔大包裝1200g (原味)">艾多美 奶昔大包裝1200g (原味)</option>
-					<option value="艾多美 奶昔大包裝1200g (綠茶)">艾多美 奶昔大包裝1200g (綠茶)</option>
-					<option value="艾多美 琉璃苣油">艾多美 琉璃苣油</option>
-					<option value="艾多美 綜合維他命">艾多美 綜合維他命</option>
-					<option value="艾多美 苦瓜萃取粉">艾多美 苦瓜萃取粉</option>
-                    <!-- Add other health product options -->
-                `;
-            } else if (category === "skincare") {
-                productSelect.innerHTML = `
-                    <option value="艾多美 daily 面膜(01) 10片 保濕補水">艾多美 daily 面膜(01) 10片 保濕補水</option>
-					<option value="艾多美 daily 面膜(02) 10片 美白">艾多美 daily 面膜(02) 10片 美白</option>
-					<option value="艾多美 daily 面膜(03) 10片 補充營養彈性">艾多美 daily 面膜(03) 10片 補充營養彈性</option>
-					<option value="艾多美 360安瓶膠原蛋白氣墊粉餅01白皙 (1粉盒+2替換芯)">艾多美 360安瓶膠原蛋白氣墊粉餅01白皙 (1粉盒+2替換芯)</option>
-					<option value="艾多美 360安瓶膠原蛋白氣墊粉餅02自然(1粉盒+2替換芯)">艾多美 360安瓶膠原蛋白氣墊粉餅02自然(1粉盒+2替換芯)</option>
-					<option value="艾多美 360安瓶膠原蛋白氣墊粉餅03健康(1粉盒+2替換芯)">艾多美 360安瓶膠原蛋白氣墊粉餅03健康(1粉盒+2替換芯)</option>
-					<option value="艾多美 BB霜 4入組">艾多美 BB霜 4入組</option>
-					<option value="艾多美 BB霜 (台灣帳號無法購買)">艾多美 BB霜 (台灣帳號無法購買)</option>
-					<option value="艾多美 HOMME保濕防曬霜 1號">艾多美 HOMME保濕防曬霜 1號</option>
-					<option value="艾多美 HOMME保濕防曬霜 2號">艾多美 HOMME保濕防曬霜 2號</option>
-					<option value="艾多美 HOMME雙色精華液80ml">艾多美 HOMME雙色精華液80ml</option>
-					<option value="艾多美 HOMME護唇膏">艾多美 HOMME護唇膏</option>
-					<option value="艾多美 化妝棉片">艾多美 化妝棉片</option>
-					<option value="艾多美 全新黃金膠原蛋白氣墊粉餅粉撲 2入">艾多美 全新黃金膠原蛋白氣墊粉餅粉撲 2入</option>
-					<option value="艾多美 水凝膠安瓶眼膜">艾多美 水凝膠安瓶眼膜</option>
-					<option value="艾多美 粉餅粉撲 2入">艾多美 粉餅粉撲 2入</option>
-					<option value="艾多美 安瓶四週護理組+安瓶促進吸收按摩器套裝">艾多美 安瓶四週護理組+安瓶促進吸收按摩器套裝</option>
-					<option value="艾多美 安瓶促進吸收按摩器">艾多美 安瓶促進吸收按摩器</option>
-					<option value="艾多美 成人防曬棒(15g)">艾多美 成人防曬棒(15g)</option>
-					<option value="艾多美 兒童防曬乳(40ml)">艾多美 兒童防曬乳(40ml)</option>
-					<option value="艾多美 空氣粉餅(21)">艾多美 空氣粉餅(21)</option>
-					<option value="艾多美 空氣粉餅(23)">艾多美 空氣粉餅(23)</option>
-					<option value="艾多美 保濕五件組旅行包">艾多美 保濕五件組旅行包</option>
-					<option value="艾多美 保濕卸妝潔面濕巾(20張)">艾多美 保濕卸妝潔面濕巾(20張)</option>
-					<option value="艾多美 旅行組保濕眼霜單品(5入)">艾多美 旅行組保濕眼霜單品(5入)</option>
-					<option value="艾多美 旅行組保濕營養霜單品(5入)">艾多美 旅行組保濕營養霜單品(5入)</option>
-					<option value="艾多美 海洋安瓶美白保濕面膜(10片) 綠色包裝">艾多美 海洋安瓶美白保濕面膜(10片) 綠色包裝</option>
-					<option value="艾多美 海洋安瓶面膜舒緩保濕(10片) 藍色包裝">艾多美 海洋安瓶面膜舒緩保濕(10片) 藍色包裝</option>
-					<option value="艾多美 神經醯胺乳香嫩膚噴霧100ml">艾多美 神經醯胺乳香嫩膚噴霧100ml</option>
-					<option value="艾多美 凝萃煥采安瓶組">艾多美 凝萃煥采安瓶組</option>
-					<option value="艾多美 凝萃煥采安瓶組(4組)">艾多美 凝萃煥采安瓶組(4組)</option>
-					<option value="艾多美 HOMME男士精華液">艾多美 HOMME男士精華液</option>
-					<option value="艾多美 眼線筆 EYELINER(淺棕)">艾多美 眼線筆 EYELINER(淺棕)</option>
-					<option value="艾多美 眼線筆 EYELINER(深棕)">艾多美 眼線筆 EYELINER(深棕)</option>
-					<option value="艾多美 眼線筆 EYELINER(黑)">艾多美 眼線筆 EYELINER(黑)</option>
-					<option value="艾多美 終極抗痘抗粉刺四件組">艾多美 終極抗痘抗粉刺四件組</option>
-					<option value="艾多美 終極抗痘抗粉刺爽膚水">艾多美 終極抗痘抗粉刺爽膚水</option>
-					<option value="艾多美 終極抗痘抗粉刺精華乳">艾多美 終極抗痘抗粉刺精華乳</option>
-					<option value="艾多美 終極抗痘抗粉刺精華液">艾多美 終極抗痘抗粉刺精華液</option>
-					<option value="艾多美 終極抗痘抗粉刺潔面慕斯">艾多美 終極抗痘抗粉刺潔面慕斯</option>
-					<option value="艾多美 絕對防曬抗藍光控油氣墊粉餅補充芯">艾多美 絕對防曬抗藍光控油氣墊粉餅補充芯</option>
-					<option value="艾多美 微針除皺貼片">艾多美 微針除皺貼片</option>
-					<option value="艾多美 水嫩亮白精華液">艾多美 水嫩亮白精華液</option>
-					<option value="艾多美 水嫩亮白乳霜">艾多美 水嫩亮白乳霜</option>
-					<option value="艾多美 凝萃煥采安瓶組0號(保濕)4盒16入">艾多美 凝萃煥采安瓶組0號(保濕)4盒16入</option>
-					<option value="艾多美 凝萃煥采安瓶組0號(保濕)一盒4入">艾多美 凝萃煥采安瓶組0號(保濕)一盒4入</option>
-					<option value="艾多美 凝萃煥采安瓶組1號(美白)4盒16入">艾多美 凝萃煥采安瓶組1號(美白)4盒16入</option>
-					<option value="艾多美 凝萃煥采安瓶組1號(美白)一盒4入">艾多美 凝萃煥采安瓶組1號(美白)一盒4入</option>
-					<option value="艾多美 凝萃煥采安瓶組2號(金箔)4盒16入">艾多美 凝萃煥采安瓶組2號(金箔)4盒16入</option>
-					<option value="艾多美 凝萃煥采安瓶組2號(金箔)一盒4入">艾多美 凝萃煥采安瓶組2號(金箔)一盒4入</option>
-					<option value="艾多美 凝萃煥采安瓶組3號(逆齡)4盒16入">艾多美 凝萃煥采安瓶組3號(逆齡)4盒16入</option>
-					<option value="艾多美 凝萃煥采安瓶組3號(逆齡)一盒4入">艾多美 凝萃煥采安瓶組3號(逆齡)一盒4入</option>
-					<option value="艾多美 積雪草化妝水 120ml (台灣帳號無法購買)">艾多美 積雪草化妝水 120ml (台灣帳號無法購買)</option>
-					<option value="艾多美 積雪草安瓶 40ml (台灣帳號無法購買)">艾多美 積雪草安瓶 40ml (台灣帳號無法購買)</option>
-					<option value="艾多美 積雪草面霜 50ml (台灣帳號無法購買)">艾多美 積雪草面霜 50ml (台灣帳號無法購買)</option>
-					<option value="艾多美 積雪草潔面乳 150ml (台灣帳號無法購買)">艾多美 積雪草潔面乳 150ml (台灣帳號無法購買)</option>
-					<option value="艾多美 優雅淨白皮革化妝包">艾多美 優雅淨白皮革化妝包</option>
-					<option value="艾多美 優雅淨白刷具五件組">艾多美 優雅淨白刷具五件組</option>
-					<option value="艾多美 HOMME男士化妝水140ml">艾多美 HOMME男士化妝水140ml</option>
-					<option value="艾多美 HOMME男士精華液 (台灣帳號無法購買)">艾多美 HOMME男士精華液 (台灣帳號無法購買)</option>
-					<option value="艾多美 360安瓶膠原蛋白氣墊粉餅9入(01白皙)">艾多美 360安瓶膠原蛋白氣墊粉餅9入(01白皙)</option>
-					<option value="艾多美 360安瓶膠原蛋白氣墊粉餅9入(02自然)">艾多美 360安瓶膠原蛋白氣墊粉餅9入(02自然)</option>
-					<option value="艾多美 360安瓶膠原蛋白氣墊粉餅9入(03健康)">艾多美 360安瓶膠原蛋白氣墊粉餅9入(03健康)</option>
-					<option value="艾多美 絕對防曬抗藍光控油氣墊粉餅">艾多美 絕對防曬抗藍光控油氣墊粉餅</option>
-					<option value="艾多美 天然皂組">艾多美 天然皂組</option>
-					<option value="艾多美眼唇卸妝水">艾多美眼唇卸妝水</option>
-					<option value="艾多美 Adelica彩妝套組1 知性棕">艾多美 Adelica彩妝套組1 知性棕</option>
-					<option value="艾多美 Adelica彩妝套組2 可愛珊瑚紅">艾多美 Adelica彩妝套組2 可愛珊瑚紅</option>
-					<option value="艾多美 Adelica彩妝套組3 經典橄欖">艾多美 Adelica彩妝套組3 經典橄欖</option>
-					<option value="艾多美 Adelica彩妝套組4 羊絨酒紅">艾多美 Adelica彩妝套組4 羊絨酒紅</option>
-					<option value="艾多美 Adelica 3D立體修容粉餅">艾多美 Adelica 3D立體修容粉餅</option>
-					<option value="艾多美 Adelica LIP COLOR GLOW 粉樣唇膏 1. 紅色">艾多美 Adelica LIP COLOR GLOW 粉樣唇膏 1. 紅色</option>
-					<option value="艾多美 Adelica LIP COLOR GLOW 粉樣唇膏 2. 珊瑚紅">艾多美 Adelica LIP COLOR GLOW 粉樣唇膏 2. 珊瑚紅</option>
-					<option value="艾多美 Adelica LIP COLOR GLOW 粉樣唇膏 3. 粉色">艾多美 Adelica LIP COLOR GLOW 粉樣唇膏 3. 粉色</option>
-					<option value="艾多美 Adelica SOFT BROW PENCIL 軟眉筆 深棕色">艾多美 Adelica SOFT BROW PENCIL 軟眉筆 深棕色</option>
-					<option value="艾多美 Adelica SOFT BROW PENCIL 軟眉筆 淺棕色">艾多美 Adelica SOFT BROW PENCIL 軟眉筆 淺棕色</option>
-					<option value="艾多美 Adelica SOFT BROW PENCIL 軟眉筆 灰色">艾多美 Adelica SOFT BROW PENCIL 軟眉筆 灰色</option>
-					<option value="艾多美 Adelica BROWCARA 眉筆 深棕色">艾多美 Adelica BROWCARA 眉筆 深棕色</option>
-					<option value="艾多美 Adelica BROWCARA 眉筆 淺棕色">艾多美 Adelica BROWCARA 眉筆 淺棕色</option>
-					<option value="艾多美 Adelica BROWCARA 眉筆 灰色">艾多美 Adelica BROWCARA 眉筆 灰色</option>
-					<option value="艾多美 Adelica SLIM LINER PENCIL 眼線筆 黑色">艾多美 Adelica SLIM LINER PENCIL 眼線筆 黑色</option>
-					<option value="艾多美 Adelica SLIM LINER PENCIL 眼線筆 棕色">艾多美 Adelica SLIM LINER PENCIL 眼線筆 棕色</option>
-					<option value="艾多美 Adelica WATERPROOF MASCARA 防水睫毛膏 黑色">艾多美 Adelica WATERPROOF MASCARA 防水睫毛膏 黑色</option>
-					<option value="艾多美 Adelica LONG-LASH MASCARA 濃長睫毛膏">艾多美 Adelica LONG-LASH MASCARA 濃長睫毛膏</option>
-					<option value="艾多美 Adelica VOLUME MASCARA濃密睫毛膏">艾多美 Adelica VOLUME MASCARA濃密睫毛膏</option>
-					<option value="艾多美 Adelica EYE PALETTE 眼影 No.1 Daily Brown">艾多美 Adelica EYE PALETTE 眼影 No.1 Daily Brown</option>
-					<option value="艾多美 Adelica EYE PALETTE 眼影 No.2 Peach Carol">艾多美 Adelica EYE PALETTE 眼影 No.2 Peach Carol</option>
-					<option value="艾多美 Adelica EYE PALETTE 眼影 No.3 Olive Brown">艾多美 Adelica EYE PALETTE 眼影 No.3 Olive Brown</option>
-					<option value="艾多美 Adelica EYE PALETTE 眼影 No.4 Pink Burgundy">艾多美 Adelica EYE PALETTE 眼影 No.4 Pink Burgundy</option>
-					<option value="艾多美 Adelica SHEER COTTON BLUSH 腮紅 桃色">艾多美 Adelica SHEER COTTON BLUSH 腮紅 桃色</option>
-					<option value="艾多美 Adelica SHEER COTTON BLUSH 腮紅 玫瑰色">艾多美 Adelica SHEER COTTON BLUSH 腮紅 玫瑰色</option>
-					<option value="艾多美 Adelica BE-SLIM BRONZER 修容組">艾多美 Adelica BE-SLIM BRONZER 修容組</option>
-					<option value="艾多美 Adelica CONCEALER 遮瑕筆 (21)">艾多美 Adelica CONCEALER 遮瑕筆 (21)</option>
-					<option value="艾多美 Adelica CONCEALER 遮瑕筆 (23)">艾多美 Adelica CONCEALER 遮瑕筆 (23)</option>
-					<option value="艾多美 Adelica 化妝刷套組">艾多美 Adelica 化妝刷套組</option>
-					<option value="艾多美 Adelica 粉刷">艾多美 Adelica 粉刷</option>
-					<option value="艾多美 Adelica 腮紅刷">艾多美 Adelica 腮紅刷</option>
-					<option value="艾多美 Adelica 陰影刷">艾多美 Adelica 陰影刷</option>
-					<option value="艾多美 Adelica 混合眼刷">艾多美 Adelica 混合眼刷</option>
-					<option value="艾多美 Adelica 眼部塗抹刷">艾多美 Adelica 眼部塗抹刷</option>
-					<option value="艾多美 清潔四件組">艾多美 清潔四件組</option>
-					<option value="艾多美 Adelica 定妝雙色蜜粉 (台灣帳號無法購買)">艾多美 Adelica 定妝雙色蜜粉 (台灣帳號無法購買)</option>
-					<option value="艾多美 男士極效多合一精華">艾多美 男士極效多合一精華</option>
-					<option value="艾多美 凝萃精華油噴霧">艾多美 凝萃精華油噴霧</option>
-					<option value="艾多美 凝萃修復霜 一入">艾多美 凝萃修復霜 一入</option>
-					<option value="艾多美 凝萃修復霜 四入組 (台灣帳號無法購買)">艾多美 凝萃修復霜 四入組 (台灣帳號無法購買)</option>
-					<option value="艾多美 Adelica 經典唇膏 1號">艾多美 Adelica 經典唇膏 1號</option>
-					<option value="艾多美 Adelica 經典唇膏 2號">艾多美 Adelica 經典唇膏 2號</option>
-					<option value="艾多美 Adelica 經典唇膏 3號">艾多美 Adelica 經典唇膏 3號</option>
-					<option value="艾多美 Adelica 經典唇膏 4號">艾多美 Adelica 經典唇膏 4號</option>
-					<option value="艾多美 Adelica 經典唇膏 5號">艾多美 Adelica 經典唇膏 5號</option>
-					<option value="艾多美 Adelica 經典唇膏 6號">艾多美 Adelica 經典唇膏 6號</option>
-					<option value="艾多美 Adelica 經典唇膏 7號">艾多美 Adelica 經典唇膏 7號</option>
-					<option value="艾多美 Adelica Luminous Matt Cover Balm 遮瑕粉餅 1號">艾多美 Adelica Luminous Matt Cover Balm 遮瑕粉餅 1號</option>
-					<option value="艾多美 Adelica Luminous Matt Cover Balm 遮瑕粉餅 2號">艾多美 Adelica Luminous Matt Cover Balm 遮瑕粉餅 2號</option>
-					<option value="艾多美 防曬霜 米色">艾多美 防曬霜 米色</option>
-					<option value="艾多美 防曬霜 白色">艾多美 防曬霜 白色</option>
-					<option value="艾多美 凝萃雪白七件組">艾多美 凝萃雪白七件組</option>
-					<option value="艾多美 凝萃雪白五件組 (台灣帳號無法購買)">艾多美 凝萃雪白五件組 (台灣帳號無法購買)</option>
-					<option value="艾多美 HOMME男士保濕三件組">艾多美 HOMME男士保濕三件組</option>
-					<option value="艾多美 月桂保濕噴霧">艾多美 月桂保濕噴霧</option>
-					<option value="艾多美 玫瑰珠光隔離乳">艾多美 玫瑰珠光隔離乳</option>
-					<option value="艾多美 潤色護唇膏">艾多美 潤色護唇膏</option>
-					<option value="艾多美 空氣粉餅(21)">艾多美 空氣粉餅(21)</option>
-					<option value="艾多美 經典保養五件組">艾多美 經典保養五件組</option>
-					<option value="艾多美 保濕化妝水150ml">艾多美 保濕化妝水150ml</option>
-					<option value="艾多美 保濕乳液135ml">艾多美 保濕乳液135ml</option>
-					<option value="艾多美 保濕眼霜40ml">艾多美 保濕眼霜40ml</option>
-					<option value="艾多美 保濕精華液50ml">艾多美 保濕精華液50ml</option>
-					<option value="艾多美 保濕凝膠">艾多美 保濕凝膠</option>
-					<option value="艾多美 保濕營養霜50ml">艾多美 保濕營養霜50ml</option>
-					<option value="艾多美 敏感肌專用防曬棒">艾多美 敏感肌專用防曬棒</option>
-					<option value="艾多美 舒緩修護化妝水">艾多美 舒緩修護化妝水</option>
-					<option value="艾多美 舒緩修護精華液">艾多美 舒緩修護精華液</option>
-					<option value="艾多美 水嫩亮白兩件組">艾多美 水嫩亮白兩件組</option>
-					<option value="艾多美 凝粹防曬BB霜(13)">艾多美 凝粹防曬BB霜(13)</option>
-					<option value="艾多美 凝粹防曬BB霜(21)">艾多美 凝粹防曬BB霜(21)</option>
-					<option value="艾多美 凝粹防曬BB霜(23)">艾多美 凝粹防曬BB霜(23)</option>
-					<option value="艾多美 凝粹防曬乳 (台灣帳號無法購買)">艾多美 凝粹防曬乳 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝萃煥膚六部曲 (台灣帳號無法購買)">艾多美 凝萃煥膚六部曲 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝萃煥膚化妝水 (台灣帳號無法購買)">艾多美 凝萃煥膚化妝水 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝萃煥膚安瓶 (台灣帳號無法購買)">艾多美 凝萃煥膚安瓶 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝萃煥膚乳液 (台灣帳號無法購買)">艾多美 凝萃煥膚乳液 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝萃煥膚眼霜 (台灣帳號無法購買)">艾多美 凝萃煥膚眼霜 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝萃煥膚營養霜 (台灣帳號無法購買)">艾多美 凝萃煥膚營養霜 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝粹煥膚精華液 (台灣帳號無法購買)">艾多美 凝粹煥膚精華液 (台灣帳號無法購買)</option>
-					<option value="艾多美 HOMME男士乳液140ml">艾多美 HOMME男士乳液140ml</option>
-					<option value="艾多美 積雪草舒緩鎮定三件組">艾多美 積雪草舒緩鎮定三件組</option>
-					<option value="艾多美 有機精油套組">艾多美 有機精油套組</option>
-					<option value="艾多美 有機荷荷巴油">艾多美 有機荷荷巴油</option>
-					<option value="艾多美 凝萃雪白隔離霜 (台灣帳號無法購買)">艾多美 凝萃雪白隔離霜 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝萃雪白面膜 (台灣帳號無法購買)">艾多美 凝萃雪白面膜 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝萃雪白晚霜 (台灣帳號無法購買)">艾多美 凝萃雪白晚霜 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝萃雪白日霜 (台灣帳號無法購買)">艾多美 凝萃雪白日霜 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝萃雪白精華液 (台灣帳號無法購買)">艾多美 凝萃雪白精華液 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝萃雪白化妝水 (台灣帳號無法購買)">艾多美 凝萃雪白化妝水 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝萃雪白淡斑修護精華 (台灣帳號無法購買)">艾多美 凝萃雪白淡斑修護精華 (台灣帳號無法購買)</option>
-					<option value="艾多美 Adelica 緞面唇膏 SATIN Dewy Coral">艾多美 Adelica 緞面唇膏 SATIN Dewy Coral</option>
-					<option value="艾多美 Adelica 緞面唇膏 SATIN Sweet Pink">艾多美 Adelica 緞面唇膏 SATIN Sweet Pink</option>
-					<option value="艾多美 Adelica 緞面唇膏 SATIN Raspberry">艾多美 Adelica 緞面唇膏 SATIN Raspberry</option>
-					<option value="艾多美 有機精油 薰衣草">艾多美 有機精油 薰衣草</option>
-					<option value="艾多美 有機精油 薄荷">艾多美 有機精油 薄荷</option>
-					<option value="艾多美 有機精油 檸檬">艾多美 有機精油 檸檬</option>
-					<option value="艾多美 遮瑕氣墊粉餅 1號">艾多美 遮瑕氣墊粉餅 1號</option>
-					<option value="艾多美 遮瑕氣墊粉餅 2號">艾多美 遮瑕氣墊粉餅 2號</option>
-					<option value="艾多美 遮瑕氣墊粉餅 3號">艾多美 遮瑕氣墊粉餅 3號</option>
-					<option value="艾多美 光亮水潤唇釉 1 櫻桃紅">艾多美 光亮水潤唇釉 1 櫻桃紅</option>
-					<option value="艾多美 光亮水潤唇釉 2 亮橙">艾多美 光亮水潤唇釉 2 亮橙</option>
-					<option value="艾多美 光亮水潤唇釉 3 霓虹粉">艾多美 光亮水潤唇釉 3 霓虹粉</option>
-					<option value="艾多美 光亮水潤唇釉 4 珊瑚楓">艾多美 光亮水潤唇釉 4 珊瑚楓</option>
-					<option value="艾多美 光亮水潤唇釉 5. 粉紫">艾多美 光亮水潤唇釉 5. 粉紫</option>
-					<option value="艾多美 光亮水潤唇釉 6 灰玫瑰">艾多美 光亮水潤唇釉 6 灰玫瑰</option>
-					<option value="艾多美凝萃煥膚 24K黃金晚安面膜">艾多美凝萃煥膚 24K黃金晚安面膜</option>
-					<option value="艾多美凝萃煥膚 24K黃金晚安面膜 三入組">艾多美凝萃煥膚 24K黃金晚安面膜 三入組</option>
-					<option value="艾多美凝萃煥膚 24K黃金晚安面膜 補充罐">艾多美凝萃煥膚 24K黃金晚安面膜 補充罐</option>
-					<option value="艾多美 防曬貼片">艾多美 防曬貼片</option>
-					<option value="艾多美 Adelica SHEER COTTON BLUSH 腮紅 粉色">艾多美 Adelica SHEER COTTON BLUSH 腮紅 粉色</option>
-					<option value="艾多美 凝萃煥膚面膜三入組">艾多美 凝萃煥膚面膜三入組</option>
-					<option value="艾多美 凝萃煥膚面膜 檜木泥士">艾多美 凝萃煥膚面膜 檜木泥士</option>
-					<option value="艾多美 凝萃煥膚面膜 法國玫瑰">艾多美 凝萃煥膚面膜 法國玫瑰</option>
-					<option value="艾多美 凝萃煥膚面膜 蜂蜜人參">艾多美 凝萃煥膚面膜 蜂蜜人參</option>
-					<option value="艾多美凝萃煥膚面膜刷">艾多美凝萃煥膚面膜刷</option>
-					<option value="艾多美 去角質棉">艾多美 去角質棉</option>
-					<option value="艾多美 去角質棉補充包">艾多美 去角質棉補充包</option>
-					<option value="艾多美 凝萃煥膚面膜 檜木泥士 補充罐">艾多美 凝萃煥膚面膜 檜木泥士 補充罐</option>
-					<option value="艾多美 凝萃煥膚面膜 法國玫瑰 補充罐">艾多美 凝萃煥膚面膜 法國玫瑰 補充罐</option>
-					<option value="艾多美 凝萃煥膚面膜 蜂蜜人參 補充罐">艾多美 凝萃煥膚面膜 蜂蜜人參 補充罐</option>
-					<option value="艾多美 Adelica 啞光唇膏 LIP ROUGE MATT 1紅色">艾多美 Adelica 啞光唇膏 LIP ROUGE MATT 1紅色</option>
-					<option value="艾多美 Adelica 啞光唇膏 LIP ROUGE MATT 2粉色">艾多美 Adelica 啞光唇膏 LIP ROUGE MATT 2粉色</option>
-					<option value="艾多美 Adelica 啞光唇膏 LIP ROUGE MATT 3玫瑰色">艾多美 Adelica 啞光唇膏 LIP ROUGE MATT 3玫瑰色</option>
-					<option value="艾多美 水嫩潤唇膏 (台灣帳號無法購買)">艾多美 水嫩潤唇膏 (台灣帳號無法購買)</option>
-					<option value="艾多美 全新黃金膠原蛋白氣墊粉餅 1號">艾多美 全新黃金膠原蛋白氣墊粉餅 1號</option>
-					<option value="艾多美 全新黃金膠原蛋白氣墊粉餅 2號">艾多美 全新黃金膠原蛋白氣墊粉餅 2號</option>
-					<option value="艾多美 全新黃金膠原蛋白氣墊粉餅 3號">艾多美 全新黃金膠原蛋白氣墊粉餅 3號</option>
-					<option value="艾多美 全新黃金膠原蛋白氣墊粉餅 4號">艾多美 全新黃金膠原蛋白氣墊粉餅 4號</option>
-					<option value="艾多美 全新黃金膠原蛋白氣墊粉餅 5號">艾多美 全新黃金膠原蛋白氣墊粉餅 5號</option>
-					<option value="艾多美 全新黃金膠原蛋白氣墊粉餅 三入組 1號">艾多美 全新黃金膠原蛋白氣墊粉餅 三入組 1號</option>
-					<option value="艾多美 全新黃金膠原蛋白氣墊粉餅 三入組 2號">艾多美 全新黃金膠原蛋白氣墊粉餅 三入組 2號</option>
-					<option value="艾多美 全新黃金膠原蛋白氣墊粉餅 三入組 3號">艾多美 全新黃金膠原蛋白氣墊粉餅 三入組 3號</option>
-					<option value="艾多美 全新黃金膠原蛋白氣墊粉餅 三入組 4號">艾多美 全新黃金膠原蛋白氣墊粉餅 三入組 4號</option>
-					<option value="艾多美 全新黃金膠原蛋白氣墊粉餅 三入組 5號">艾多美 全新黃金膠原蛋白氣墊粉餅 三入組 5號</option>
-					<option value="艾多美 Adelica Luminous Matt Cover Balm 遮瑕粉餅 1號補充包">艾多美 Adelica Luminous Matt Cover Balm 遮瑕粉餅 1號補充包</option>
-					<option value="艾多美 Adelica Luminous Matt Cover Balm 遮瑕粉餅 2號補充包">艾多美 Adelica Luminous Matt Cover Balm 遮瑕粉餅 2號補充包</option>
-					<option value="艾多美 清新防曬乳液">艾多美 清新防曬乳液</option>
-					<option value="艾多美 凝萃保濕霜">艾多美 凝萃保濕霜</option>
-					<option value="艾多美 凝萃保濕霜 四入組">艾多美 凝萃保濕霜 四入組</option>
-					<option value="艾多美 粉撲 2入">艾多美 粉撲 2入</option>
-					<option value="艾多美 玫瑰舒緩噴霧">艾多美 玫瑰舒緩噴霧</option>
-                    <!-- Add other skincare product options -->
-                `;
-            }else if (category === "body") {
-                productSelect.innerHTML = `
-<option value="艾多美 Homme 男士多功能洗面乳 (台灣帳號無法購買)">艾多美 Homme 男士多功能洗面乳 (台灣帳號無法購買)</option>
-					<option value="艾多美 Homme 男士洗髮沐浴露 500ml">艾多美 Homme 男士洗髮沐浴露 500ml</option>
-					<option value="艾多美 抗毛躁絲蛋白頭髮精華幕斯(乾溼皆可用) 155ml">艾多美 抗毛躁絲蛋白頭髮精華幕斯(乾溼皆可用) 155ml</option>
-					<option value="艾多美 泡泡染5號">艾多美 泡泡染5號</option>
-					<option value="艾多美 泡泡染6號">艾多美 泡泡染6號</option>
-					<option value="艾多美 泡泡染7號">艾多美 泡泡染7號</option>
-					<option value="艾多美 草本沐浴精">艾多美 草本沐浴精</option>
-					<option value="艾多美 草本沐浴精 4入組">艾多美 草本沐浴精 4入組</option>
-					<option value="艾多美 草本洗髮精">艾多美 草本洗髮精</option>
-					<option value="艾多美 草本洗髮精 4入組">艾多美 草本洗髮精 4入組</option>
-					<option value="艾多美 捲髮專用護髮素150ml">艾多美 捲髮專用護髮素150ml</option>
-					<option value="艾多美 蛋白密集型洗髮精">艾多美 蛋白密集型洗髮精</option>
-					<option value="艾多美 蛋白密集型護髮兩件組">艾多美 蛋白密集型護髮兩件組</option>
-					<option value="艾多美 蛋白密集型護髮素">艾多美 蛋白密集型護髮素</option>
-					<option value="艾多美 極致豐盈沐浴乳">艾多美 極致豐盈沐浴乳</option>
-					<option value="艾多美 極致豐盈身體乳">艾多美 極致豐盈身體乳</option>
-					<option value="艾多美 頭皮調理潤髮乳">艾多美 頭皮調理潤髮乳</option>
-					<option value="艾多美 頭皮護理兩件組(舒爽洗髮露+頭皮調理護髮素)">艾多美 頭皮護理兩件組(舒爽洗髮露+頭皮調理護髮素)</option>
-					<option value="艾多美 護手霜">艾多美 護手霜</option>
-					<option value="艾多美 蛋白密集型洗護髮三件組">艾多美 蛋白密集型洗護髮三件組</option>
-					<option value="艾多美 柔護寶貝三件組">艾多美 柔護寶貝三件組</option>
-					<option value="艾多美 凝粹護髮素">艾多美 凝粹護髮素</option>
-					<option value="艾多美 男士髮蠟">艾多美 男士髮蠟</option>
-					<option value="艾多美 柔護寶貝洗髮沐浴露">艾多美 柔護寶貝洗髮沐浴露</option>
-					<option value="艾多美 柔護寶貝保濕乳霜">艾多美 柔護寶貝保濕乳霜</option>
-					<option value="艾多美 柔護寶貝潤膚乳">艾多美 柔護寶貝潤膚乳</option>
-					<option value="艾多美 沙龍染髮劑 2C 玫瑰棕">艾多美 沙龍染髮劑 2C 玫瑰棕</option>
-					<option value="艾多美 沙龍染髮劑 3C 黃金棕">艾多美 沙龍染髮劑 3C 黃金棕</option>
-					<option value="艾多美 沙龍染髮劑 4C 珊瑚棕">艾多美 沙龍染髮劑 4C 珊瑚棕</option>
-					<option value="艾多美 沙龍染髮劑 5G 棕色">艾多美 沙龍染髮劑 5G 棕色</option>
-					<option value="艾多美 沙龍染髮劑 6G 深棕色">艾多美 沙龍染髮劑 6G 深棕色</option>
-					<option value="艾多美 沙龍染髮劑 7G 黑色">艾多美 沙龍染髮劑 7G 黑色</option>
-					<option value="艾多美兒童天然牙膏">艾多美兒童天然牙膏</option>
-					<option value="艾多美沐浴旅行組">艾多美沐浴旅行組</option>
-					<option value="艾多美 糖身體磨砂膏">艾多美 糖身體磨砂膏</option>
-					<option value="艾多美 護髮油 (台灣帳號無法購買)">艾多美 護髮油 (台灣帳號無法購買)</option>
-					<option value="艾多美 足部磨砂膏">艾多美 足部磨砂膏</option>
-					<option value="艾多美 足部滋養霜">艾多美 足部滋養霜</option>
-					<option value="艾多美 足部護理組">艾多美 足部護理組</option>
-					<option value="艾多美 抗敏感牙膏(100g 三入)">艾多美 抗敏感牙膏(100g 三入)</option>
-					<option value="艾多美 舌苔清潔棒">艾多美 舌苔清潔棒</option>
-					<option value="艾多美 孕期護理套組">艾多美 孕期護理套組</option>
-					<option value="艾多美 孕期彈力護膚霜">艾多美 孕期彈力護膚霜</option>
-					<option value="艾多美 孕期身體護理油">艾多美 孕期身體護理油</option>
-					<option value="艾多美 護手霜四件組">艾多美 護手霜四件組</option>
-					<option value="艾多美 弱酸皂">艾多美 弱酸皂</option>
-					<option value="艾多美 鹽身體磨砂膏">艾多美 鹽身體磨砂膏</option>
-					<option value="艾多美 女性私密處清潔慕斯">艾多美 女性私密處清潔慕斯</option>
-					<option value="艾多美 護手霜 三入組">艾多美 護手霜 三入組</option>
-					<option value="艾多美 護手霜 MARINE">艾多美 護手霜 MARINE</option>
-					<option value="艾多美 護手霜 PURE">艾多美 護手霜 PURE</option>
-					<option value="艾多美 護手霜 BUTTER">艾多美 護手霜 BUTTER</option>
-					<option value="艾多美 亮白薄荷牙膏(150g 三入)">艾多美 亮白薄荷牙膏(150g 三入)</option>
-					<option value="艾多美 髮根強健套組">艾多美 髮根強健套組</option>
-					<option value="艾多美 髮根強健洗髮精">艾多美 髮根強健洗髮精</option>
-					<option value="艾多美 髮根強健髮膜">艾多美 髮根強健髮膜</option>
-					<option value="艾多美 髮根強健安瓶">艾多美 髮根強健安瓶</option>
-					<option value="艾多美 髮根強健安瓶 三入組">艾多美 髮根強健安瓶 三入組</option>
-					<option value="艾多美 髮根強健加強套組">艾多美 髮根強健加強套組</option>
-					<option value="艾多美 沙龍髮根染髮劑 3C 黃金棕 一盒四劑">艾多美 沙龍髮根染髮劑 3C 黃金棕 一盒四劑</option>
-					<option value="艾多美 沙龍髮根染髮劑 5G 棕色 一盒四劑">艾多美 沙龍髮根染髮劑 5G 棕色 一盒四劑</option>
-					<option value="艾多美 沙龍髮根染髮劑 6G 深棕色 一盒四劑">艾多美 沙龍髮根染髮劑 6G 深棕色 一盒四劑</option>
-                    <!-- Add other body product options -->
-                `;
-            }else if (category === "living") {
-                productSelect.innerHTML = `
-<option value="艾多美 濾水壺 中">艾多美 濾水壺 中</option>
-					<option value="艾多美 濾水壺 大">艾多美 濾水壺 大</option>
-					<option value="艾多美 20cm*100M切割式保鮮膜">艾多美 20cm*100M切割式保鮮膜</option>
-					<option value="艾多美 22cm不鏽鋼平底鍋">艾多美 22cm不鏽鋼平底鍋</option>
-					<option value="艾多美 28cm不鏽鋼平底鍋">艾多美 28cm不鏽鋼平底鍋</option>
-					<option value="艾多美 68.9%酒精抗菌配方居家消毒噴霧 500ml">艾多美 68.9%酒精抗菌配方居家消毒噴霧 500ml</option>
-					<option value="艾多美 KF80兒童防塵防霧霾口罩">艾多美 KF80兒童防塵防霧霾口罩</option>
-					<option value="艾多美 KF94兒童防塵防霧霾口罩">艾多美 KF94兒童防塵防霧霾口罩</option>
-					<option value="艾多美 SlimBody水杯">艾多美 SlimBody水杯</option>
-					<option value="艾多美 可彎重複使用型牙間刷SS(16支)">艾多美 可彎重複使用型牙間刷SS(16支)</option>
-					<option value="艾多美 可彎重複使用型牙間刷SSSS(16支)">艾多美 可彎重複使用型牙間刷SSSS(16支)</option>
-					<option value="艾多美 乳膠枕L">艾多美 乳膠枕L</option>
-					<option value="艾多美 乳膠枕M">艾多美 乳膠枕M</option>
-					<option value="艾多美 乳膠枕S">艾多美 乳膠枕S</option>
-					<option value="艾多美 拋棄式衛生手套110入">艾多美 拋棄式衛生手套110入</option>
-					<option value="艾多美 枕頭套L(白色)">艾多美 枕頭套L(白色)</option>
-					<option value="艾多美 枕頭套L(灰色)">艾多美 枕頭套L(灰色)</option>
-					<option value="艾多美 枕頭套M(白色)">艾多美 枕頭套M(白色)</option>
-					<option value="艾多美 枕頭套M(灰色)">艾多美 枕頭套M(灰色)</option>
-					<option value="艾多美 枕頭套S(白色)">艾多美 枕頭套S(白色)</option>
-					<option value="艾多美 枕頭套S(灰色)">艾多美 枕頭套S(灰色)</option>
-					<option value="艾多美 保溫隨行杯 420ml">艾多美 保溫隨行杯 420ml</option>
-					<option value="艾多美 保鮮夾鏈袋(18*20cm)22入 (小)">艾多美 保鮮夾鏈袋(18*20cm)22入 (小)</option>
-					<option value="艾多美 保鮮夾鏈袋(25*30cm)22入 (大)">艾多美 保鮮夾鏈袋(25*30cm)22入 (大)</option>
-					<option value="艾多美 保鮮膜30*10000cm">艾多美 保鮮膜30*10000cm</option>
-					<option value="艾多美 夏日冷飲隨手杯500ml">艾多美 夏日冷飲隨手杯500ml</option>
-					<option value="艾多美 浴室清潔劑600ml*2 一組">艾多美 浴室清潔劑600ml*2 一組</option>
-					<option value="艾多美 無封口保鮮袋(17*25cm)110入 (小)">艾多美 無封口保鮮袋(17*25cm)110入 (小)</option>
-					<option value="艾多美 無封口保鮮袋(25*35cm)110入 (中)">艾多美 無封口保鮮袋(25*35cm)110入 (中)</option>
-					<option value="艾多美 無封口保鮮袋(30*40cm)110入 (大)">艾多美 無封口保鮮袋(30*40cm)110入 (大)</option>
-					<option value="艾多美 飯店級長款毛巾(3入) 白色">艾多美 飯店級長款毛巾(3入) 白色</option>
-					<option value="艾多美 滾筒式清潔組(三捲+刷具)黏地板牆壁寵物毛髮">艾多美 滾筒式清潔組(三捲+刷具)黏地板牆壁寵物毛髮</option>
-					<option value="艾多美 滾筒黏貼清潔組(滾筒掃把1+替換芯5)">艾多美 滾筒黏貼清潔組(滾筒掃把1+替換芯5)</option>
-					<option value="艾多美 維他命C過濾器 無香味">艾多美 維他命C過濾器 無香味</option>
-					<option value="艾多美 維他命C過濾器 檸檬香">艾多美 維他命C過濾器 檸檬香</option>
-					<option value="艾多美 維他命C蓮蓬頭">艾多美 維他命C蓮蓬頭</option>
-					<option value="艾多美 廚房清潔劑600ml*2 一組">艾多美 廚房清潔劑600ml*2 一組</option>
-					<option value="艾多美 潔淨沐浴手套">艾多美 潔淨沐浴手套</option>
-					<option value="艾多美 蔬果餐具清潔液1kg">艾多美 蔬果餐具清潔液1kg</option>
-					<option value="艾多美 濕紙巾20抽3入(隨行包)">艾多美 濕紙巾20抽3入(隨行包)</option>
-					<option value="艾多美 濕紙巾70抽8入">艾多美 濕紙巾70抽8入</option>
-					<option value="艾多美 擴香禮盒-1">艾多美 擴香禮盒-1</option>
-					<option value="艾多美 擴香禮盒-1">艾多美 擴香禮盒-1</option>
-					<option value="艾多美 擴香禮盒-1">艾多美 擴香禮盒-1</option>
-					<option value="艾多美 擴香禮盒-1">艾多美 擴香禮盒-1</option>
-					<option value="艾多美 擴香禮盒-1">艾多美 擴香禮盒-1</option>
-					<option value="艾多美 狗狗乾糧">艾多美 狗狗乾糧</option>
-					<option value="艾多美 狗狗乾糧">艾多美 狗狗乾糧</option>
-					<option value="艾多美 保濕抗菌乾洗手(500ml家庭號)">艾多美 保濕抗菌乾洗手(500ml家庭號)</option>
-					<option value="艾多美 保濕抗菌乾洗手(50ml*3便攜組)">艾多美 保濕抗菌乾洗手(50ml*3便攜組)</option>
-					<option value="艾多美 洗衣紙 (30入)">艾多美 洗衣紙 (30入)</option>
-					<option value="艾多美 家事清潔乳膠手套(L)">艾多美 家事清潔乳膠手套(L)</option>
-					<option value="艾多美 雜質過濾濾心">艾多美 雜質過濾濾心</option>
-					<option value="艾多美 寵物潔牙棒 螺旋藻">艾多美 寵物潔牙棒 螺旋藻</option>
-					<option value="艾多美 寵物潔牙棒 蔓越莓">艾多美 寵物潔牙棒 蔓越莓</option>
-					<option value="艾多美 寵物潔牙棒 甘藷">艾多美 寵物潔牙棒 甘藷</option>
-					<option value="艾多美 飯店級長款毛巾(3入) 駝色">艾多美 飯店級長款毛巾(3入) 駝色</option>
-					<option value="艾多美 飯店級長款毛巾(3入) 灰色">艾多美 飯店級長款毛巾(3入) 灰色</option>
-					<option value="艾多美 飯店級長款毛巾(3入) 紫色">艾多美 飯店級長款毛巾(3入) 紫色</option>
-					<option value="艾多美 O2潔白洗衣粉">艾多美 O2潔白洗衣粉</option>
-					<option value="艾多美 除濕乾燥劑">艾多美 除濕乾燥劑</option>
-					<option value="艾多美 兒童牙刷">艾多美 兒童牙刷</option>
-					<option value="艾多美 滾筒式清潔組補充包">艾多美 滾筒式清潔組補充包</option>
-					<option value="艾多美 滾筒式清潔組滾筒掃把補充包">艾多美 滾筒式清潔組滾筒掃把補充包</option>
-					<option value="艾多美 抗菌消毒除臭噴霧">艾多美 抗菌消毒除臭噴霧</option>
-					<option value="艾多美 蜂膠牙膏200g5入 (台灣帳號無法購買)">艾多美 蜂膠牙膏200g5入 (台灣帳號無法購買)</option>
-					<option value="艾多美 蜂膠牙膏50g4入 (台灣帳號無法購買)">艾多美 蜂膠牙膏50g4入 (台灣帳號無法購買)</option>
-					<option value="艾多美 Air-Fit 口罩 3入 M">艾多美 Air-Fit 口罩 3入 M</option>
-					<option value="艾多美 Air-Fit 口罩 3入 L">艾多美 Air-Fit 口罩 3入 L</option>
-					<option value="艾多美 濾水壺濾心">艾多美 濾水壺濾心</option>
-					<option value="艾多美 擴香禮盒-2 花香">艾多美 擴香禮盒-2 花香</option>
-					<option value="艾多美 擴香禮盒-2 果香">艾多美 擴香禮盒-2 果香</option>
-					<option value="艾多美 擴香禮盒-2 海洋">艾多美 擴香禮盒-2 海洋</option>
-					<option value="艾多美 衣物去汙劑">艾多美 衣物去汙劑</option>
-					<option value="艾多美 衣物去汙劑 補充包">艾多美 衣物去汙劑 補充包</option>
-					<option value="艾多美 衣物去汙劑組">艾多美 衣物去汙劑組</option>
-					<option value="艾多美 攜帶式漱口水 50入">艾多美 攜帶式漱口水 50入</option>
-					<option value="艾多美 瓶裝漱口水 800ml">艾多美 瓶裝漱口水 800ml</option>
-					<option value="艾多美 陶瓷平底鍋24cm">艾多美 陶瓷平底鍋24cm</option>
-					<option value="艾多美 陶瓷平底鍋28cm">艾多美 陶瓷平底鍋28cm</option>
-					<option value="艾多美 陶瓷炒鍋28cm">艾多美 陶瓷炒鍋28cm</option>
-					<option value="艾多美 陶瓷鍋鍋蓋28cm">艾多美 陶瓷鍋鍋蓋28cm</option>
-					<option value="艾多美 陶瓷鍋專用菜瓜布">艾多美 陶瓷鍋專用菜瓜布</option>
-					<option value="艾多美 洗衣膠囊（100入）">艾多美 洗衣膠囊（100入）</option>
-                    <!-- Add other living product options -->
-                `;
-            }else if (category === "food") {
-                productSelect.innerHTML = `
-<option value="艾多美 阿拉比卡黑咖啡迷你包">艾多美 阿拉比卡黑咖啡迷你包</option>
-					<option value="艾多美 100%頂級酪梨油500ml">艾多美 100%頂級酪梨油500ml</option>
-					<option value="人參雞湯1kg(2包)">人參雞湯1kg(2包)</option>
-					<option value="艾多美 小魚乾250g(小)">艾多美 小魚乾250g(小)</option>
-					<option value="艾多美 小魚乾350g(大)">艾多美 小魚乾350g(大)</option>
-					<option value="艾多美 切段海帶150g">艾多美 切段海帶150g</option>
-					<option value="艾多美 木醣醇口香糖">艾多美 木醣醇口香糖</option>
-					<option value="艾多美 9次烘烤竹鹽 250g">艾多美 9次烘烤竹鹽 250g</option>
-					<option value="有機米餅(洋蔥)">有機米餅(洋蔥)</option>
-					<option value="有機米餅(原味)">有機米餅(原味)</option>
-					<option value="艾多美 有機米餅整箱24包(原味)">艾多美 有機米餅整箱24包(原味)</option>
-					<option value="艾多美 有機米餅整箱24包(洋蔥)">艾多美 有機米餅整箱24包(洋蔥)</option>
-					<option value="艾多美 有機剝殼栗子50g(3包)">艾多美 有機剝殼栗子50g(3包)</option>
-					<option value="艾多美 有機綠茶">艾多美 有機綠茶</option>
-					<option value="艾多美 有機礦物質原糖500g(2包)">艾多美 有機礦物質原糖500g(2包)</option>
-					<option value="艾多美 羊羹禮盒(15個)">艾多美 羊羹禮盒(15個)</option>
-					<option value="艾多美 冷粹咖啡禮盒 (肯亞咖啡色*2/紫色包裝*2/咖啡色*1+紫色*1)">艾多美 冷粹咖啡禮盒 (肯亞咖啡色*2/紫色包裝*2/咖啡色*1+紫色*1)</option>
-					<option value="艾多美 冷粹咖啡禮盒 (肯亞咖啡色*2/紫色包裝*2/咖啡色*1+紫色*1)">艾多美 冷粹咖啡禮盒 (肯亞咖啡色*2/紫色包裝*2/咖啡色*1+紫色*1)</option>
-					<option value="艾多美 冷粹咖啡禮盒 (肯亞咖啡色*2/紫色包裝*2/咖啡色*1+紫色*1)">艾多美 冷粹咖啡禮盒 (肯亞咖啡色*2/紫色包裝*2/咖啡色*1+紫色*1)</option>
-					<option value="豆腐餅(80g 3入)">豆腐餅(80g 3入)</option>
-					<option value="艾多美 芝麻油">艾多美 芝麻油</option>
-					<option value="柳橙汁180ml(10入)">柳橙汁180ml(10入)</option>
-					<option value="艾多美 海帶絲80g">艾多美 海帶絲80g</option>
-					<option value="艾多美 海鮮高湯包(15入)">艾多美 海鮮高湯包(15入)</option>
-					<option value="艾多美 有機玉米餅">艾多美 有機玉米餅</option>
-					<option value="雪濃湯600ml(3包)">雪濃湯600ml(3包)</option>
-					<option value="單品罐裝拿鐵30罐">單品罐裝拿鐵30罐</option>
-					<option value="艾多美 紫蘇油">艾多美 紫蘇油</option>
-					<option value="艾多美 葡萄柚汁 180ml / 10入">艾多美 葡萄柚汁 180ml / 10入</option>
-					<option value="艾多美 辣椒醬 1kg">艾多美 辣椒醬 1kg</option>
-					<option value="艾多美 螺肉罐頭">艾多美 螺肉罐頭</option>
-					<option value="艾多美 鍋粑餅(12包入)">艾多美 鍋粑餅(12包入)</option>
-					<option value="艾多美 藝伎冷萃咖啡 紫色包裝">艾多美 藝伎冷萃咖啡 紫色包裝</option>
-					<option value="艾多美 有機玉米餅(箱/24包) 原味">艾多美 有機玉米餅(箱/24包) 原味</option>
-					<option value="艾多美 肯亞冷萃咖啡 褐色包裝">艾多美 肯亞冷萃咖啡 褐色包裝</option>
-					<option value="艾多美 馬鈴薯蔬菜拉麵(不辣)一箱24包">艾多美 馬鈴薯蔬菜拉麵(不辣)一箱24包</option>
-					<option value="艾多美 葡萄籽油500ml *2">艾多美 葡萄籽油500ml *2</option>
-					<option value="艾多美 咖哩調理包">艾多美 咖哩調理包</option>
-					<option value="艾多美 ABC果汁">艾多美 ABC果汁</option>
-					<option value="艾多美 火腿罐頭 (3入)">艾多美 火腿罐頭 (3入)</option>
-					<option value="艾多美 有機玉米餅(箱/24包) 蜂蜜奶油口味">艾多美 有機玉米餅(箱/24包) 蜂蜜奶油口味</option>
-					<option value="艾多美 9次烘烤竹鹽粉">艾多美 9次烘烤竹鹽粉</option>
-					<option value="艾多美 大洋燕麥粉">艾多美 大洋燕麥粉</option>
-					<option value="艾多美 牛奶巧克力球">艾多美 牛奶巧克力球</option>
-					<option value="艾多美 黑巧克力球">艾多美 黑巧克力球</option>
-					<option value="艾多美清涼薄荷糖">艾多美清涼薄荷糖</option>
-					<option value="艾多美清涼蜜桃糖">艾多美清涼蜜桃糖</option>
-					<option value="艾多美 馬鈴薯辣味乾拌麵 十包入">艾多美 馬鈴薯辣味乾拌麵 十包入</option>
-					<option value="艾多美 黑胡椒粒">艾多美 黑胡椒粒</option>
-					<option value="艾多美 白胡椒粒">艾多美 白胡椒粒</option>
-					<option value="艾多美 無糖二合一咖啡">艾多美 無糖二合一咖啡</option>
-					<option value="艾多美 綜合茶 柚香">艾多美 綜合茶 柚香</option>
-					<option value="艾多美 綜合茶 南瓜">艾多美 綜合茶 南瓜</option>
-					<option value="艾多美 綜合茶 薰衣草">艾多美 綜合茶 薰衣草</option>
-                    <!-- Add other food product options -->
-                `;
-            } 
+            const options = products.map(product => 
+                `<option value="${product.name}" data-pv="${product.pv}">${product.name} (${product.details})</option>`
+            ).join('');
 
-            const quantityInput = document.createElement("input");
-            quantityInput.type = "number";
-            quantityInput.name = `${category}_quantity[]`;
-            quantityInput.min = "1";
-            quantityInput.placeholder = "數量";
+            document.querySelectorAll(selector).forEach(select => {
+                select.innerHTML = `<option value="" selected>請選擇商品</option>` + options;
+                $(select).select2();  // 啟用 Select2 搜尋功能
+            });
+        })
+        .catch(error => console.error("無法獲取產品資料:", error));
+}
 
-            const deleteButton = document.createElement("button");
-            deleteButton.type = "button";
-            deleteButton.innerText = "刪除";
-            deleteButton.onclick = function() {
-                categoryList.removeChild(newRow);
-            };
-
-            newRow.appendChild(productSelect);
-            newRow.appendChild(quantityInput);
-            newRow.appendChild(deleteButton);
-            categoryList.appendChild(newRow);
-        }
+        window.onload = function() {
+            fetchProductsFromGoogleSheets('onsale', 'select[name="onsale_product[]"]');
+            fetchProductsFromGoogleSheets('health', 'select[name="health_product[]"]');
+            fetchProductsFromGoogleSheets('skincare', 'select[name="skincare_product[]"]');
+            fetchProductsFromGoogleSheets('body', 'select[name="body_product[]"]');
+            fetchProductsFromGoogleSheets('living', 'select[name="living_product[]"]');
+            fetchProductsFromGoogleSheets('food', 'select[name="food_product[]"]');
+        };
 
 
+        // 表單提交處理
+      function submitForm(event) {
+    event.preventDefault();  // 防止表單自動提交
+    const submitButton = document.getElementById('submitButton');
+    submitButton.disabled = true;  // 禁用按鈕
+    setTimeout(() => submitButton.disabled = false, 5000);  // 5秒後啟用按鈕
 
-        function submitForm() {
-		        event.preventDefault();  // 防止表單自動提交
-const submitButton = document.getElementById('submitButton');
-            submitButton.disabled = true;  // 禁用按鈕
-            setTimeout(() => submitButton.disabled = false, 5000);  // 5秒後啟用按鈕
-			
     const formData = new FormData(document.getElementById('orderForm'));
 
-    // 直接將陣列轉為字符串
-    const healthProducts = formData.getAll("health_product[]").join(','); 
-    const skincareProducts = formData.getAll("skincare_product[]").join(',');
+    // 取得訂單明細表格中的所有商品與數量
+    let orderSummary = [];
+    document.querySelectorAll("#summaryTable tbody tr").forEach(row => {
+        const productName = row.children[0].innerText;  // 商品名稱
+        const quantity = row.children[1].innerText;     // 數量
+        orderSummary.push(`${productName} x ${quantity}`);
+    });
 
-    // 設置新的值
-    formData.set("health_product[]", healthProducts); 
-    formData.set("skincare_product[]", skincareProducts);
+    // 將訂單明細加入 FormData
+    formData.append("order_summary", orderSummary.join("; ")); 
 
-		
-    fetch("https://script.google.com/macros/s/AKfycby1bT3aeMo1cSf9tGdvG8KKiBY6i55bCV1H59P8zgWeatvdNCfeZzNQC0Ye0xDdspFj2g/exec", {
+    // 打印 FormData 中的所有值以確保資料正確
+    for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+    }
+
+    fetch("https://script.google.com/macros/s/AKfycbz7J26R2-UdgLWrO6yJFEs8zX4CzSQdlcpr_wrWIbpR0bt9_8W0ySmWUMfB0JG7AuEQpA/exec", {
         method: "POST",
         body: formData
     })
     .then(response => response.text())
     .then(result => {
-	        console.log(result);  // 打印伺服器回應內容
         alert(result);
 
         // 重設所有數量欄位的值為空白
         document.querySelectorAll('input[type="number"]').forEach(input => input.value = "");
+        
+        // 清空訂單明細表格
+        document.querySelector("#summaryTable tbody").innerHTML = "";
+		
+		// 重置總PV數值
+        totalPV = 0;
+        updateTotalPV();  // 更新總PV顯示為 0
     })
     .catch(error => console.error("錯誤:", error));
+
+
+	
+        }
+		// 更新總PV數值
+let totalPV = 0;  // 移到全域範圍，讓它不會每次加入商品時被重置
+
+function addProductToSummary() {
+    const categories = ["onsale", "health", "skincare", "body", "living", "food"];
+    
+    categories.forEach(category => {
+        document.querySelectorAll(`select[name="${category}_product[]"]`).forEach(select => {
+            const productName = select.value;
+            const quantityInput = select.closest(".productRow").querySelector(`input[name="${category}_quantity[]"]`);
+            
+            if (productName && quantityInput && parseInt(quantityInput.value) > 0) {
+                const productOption = Array.from(select.options).find(option => option.value === productName);
+                const pvValue = parseInt(productOption.getAttribute("data-pv")) || 0;
+
+                // 創建新行並更新訂單明細
+                const row = document.createElement("tr");
+                row.innerHTML = ` 
+                    <td>${productName}</td>
+                    <td>${quantityInput.value}</td>
+                    <td>${pvValue}</td>
+                    <td><button type="button" class="remove-btn">❌</button></td>
+                `;
+                document.querySelector("#summaryTable tbody").appendChild(row);
+
+                totalPV += pvValue * parseInt(quantityInput.value);  // 累加到總PV數值
+
+                row.querySelector(".remove-btn").addEventListener("click", function() {
+                    removeProduct(this, pvValue, quantityInput.value);  // 綁定移除功能，並更新總PV
+                });
+
+                // 清空選擇的商品和數量欄位
+                select.value = "";
+                quantityInput.value = "";
+            }
+        });
+    });
+
+    updateTotalPV();  // 顯示更新後的總PV數值
 }
- 
+
+// 更新總PV數值
+function updateTotalPV() {
+    let totalPVElem = document.getElementById("totalPV");
+    if (!totalPVElem) {
+        totalPVElem = document.createElement("p");
+        totalPVElem.id = "totalPV";
+        document.querySelector("#orderSummary").appendChild(totalPVElem);
+    }
+    totalPVElem.innerHTML = `總計 PV: ${totalPV}`;
+}
+
+
+
+
+// 移除商品的方法
+function removeProduct(button) {
+    const row = button.closest("tr");
+
+    // 獲取該行的 PV 和數量
+    const pvValue = parseInt(row.children[2].innerText) || 0;  // PV 數值
+    const quantity = parseInt(row.children[1].innerText) || 0; // 數量
+
+    // 減去移除商品的PV
+    totalPV -= pvValue * quantity;
+
+    // 顯示更新後的總PV
+    updateTotalPV();
+
+    // 刪除該行
+    row.remove();
+}
+
+
+
+
     </script>
 </head>
 <body>
-    <form id="orderForm" onsubmit="submitForm(); return false;">
-
+    <form id="orderForm" onsubmit="submitForm(event); return false;">
         <h2>商品訂購表單</h2>
-        
-        <!-- Customer Info -->
-        <label>帳號: <input type="text" name="name" required></label><br>
-        <label>密碼: <input type="text" name="password" required></label><br>
-        <label>PV日期: <input type="text" name="rdate" required></label><br>
-        <label>收件人: <input type="text" name="rname" required></label><br>
-        <label>電話: <input type="text" name="rphone" required></label><br>
-        <label>地址: <input type="text" name="raddress" required></label><br>
-        <label>Line名稱: <input type="text" name="rlinename" required></label><br><br>
 
-        <!-- on sale Category -->
+        <!-- 用戶基本資料 -->
+        <form>
+        <div class="form-group">
+            <label for="name">帳號:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">密碼:</label>
+            <input type="text" id="password" name="password" required>
+        </div>
+
+        <div class="form-group">
+            <label for="rdate">PV日期(月/日):</label>
+            <input type="text" id="rdate" name="rdate" required>
+        </div>
+
+        <div class="form-group">
+            <label for="rname">收件人:</label>
+            <input type="text" id="rname" name="rname" required>
+        </div>
+
+        <div class="form-group">
+            <label for="rphone">電話:</label>
+            <input type="text" id="rphone" name="rphone" required>
+        </div>
+
+        <div class="form-group">
+            <label for="raddress">收件門市/地址:</label>
+            <input type="text" id="raddress" name="raddress" required>
+        </div>
+
+        <div class="form-group">
+            <label for="rlinename">Line名稱:</label>
+            <input type="text" id="rlinename" name="rlinename" required>
+        </div>
+
+<div id="orderSummary">
+    <h3>訂單明細</h3>
+    <table id="summaryTable" border="1">
+        <thead>
+            <tr>
+                <th>商品名稱</th>
+                <th>數量</th>
+                <th>PV數值</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 這裡會動態添加選擇的商品 -->
+        </tbody>
+    </table>
+    <!-- 顯示總PV數值 -->
+    <p id="totalPV">總計 PV: 0</p>
+</div>
+
+
+        <!-- 優惠組 Category -->
         <h3>優惠組</h3>
         <div id="onsaleList">
             <div class="productRow">
-                <label>商品: <select name="onsale_product[]">
-                    <option value="蜂蜜飲4盒組共240包 (台灣帳號無法購買)">蜂蜜飲4盒組共240包 (台灣帳號無法購買)</option>
-					<option value="蜂蜜飲1盒組共120包 (台灣帳號無法購買)">蜂蜜飲1盒組共120包 (台灣帳號無法購買)</option>
-					<option value="優惠四入組 艾多美 rTG純素海藻omega3膠囊">優惠四入組 艾多美 rTG純素海藻omega3膠囊</option>
-					<option value="優惠四入組 艾多美 rTG魚油">優惠四入組 艾多美 rTG魚油</option>
-					<option value="優惠四入組 艾多美 胃健康日常護理">優惠四入組 艾多美 胃健康日常護理</option>
-					<option value="優惠四入組 艾多美 兒童益生菌">優惠四入組 艾多美 兒童益生菌</option>
-					<option value="活動商品 艾多美 蜂蜜飲1盒組共60包 (台灣帳號無法購買)">活動商品 艾多美 蜂蜜飲1盒組共60包 (台灣帳號無法購買)</option>
-					<option value="優惠組兩入組 艾多美 諾麗果汁隨身包">優惠組兩入組 艾多美 諾麗果汁隨身包</option>
-					<option value="艾多美 陶瓷鍋組（三個鍋子+鍋蓋+菜瓜布）">艾多美 陶瓷鍋組（三個鍋子+鍋蓋+菜瓜布）</option>
-					<option value="艾多美 清新防曬乳液三入組">艾多美 清新防曬乳液三入組</option>
-					<option value="優惠四入組 艾多美 女性益生菌">優惠四入組 艾多美 女性益生菌</option>
-					<option value="優惠組 艾多美 有機精油套組 買一送一">優惠組 艾多美 有機精油套組 買一送一</option>
-					<option value="優惠組 艾多美 有機精油 買一送一">優惠組 艾多美 有機精油 買一送一</option>
-					<option value="優惠組 艾多美 有機精油 買一送一">優惠組 艾多美 有機精油 買一送一</option>
-					<option value="優惠組 艾多美 有機精油 買一送一">優惠組 艾多美 有機精油 買一送一</option>
-					<option value="優惠三入組 艾多美 綜合能量飲 加送隨身杯">優惠三入組 艾多美 綜合能量飲 加送隨身杯</option>
-					<option value="艾多美 蜂蜜飲1盒組共30包 (台灣帳號無法購買)">艾多美 蜂蜜飲1盒組共30包 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝萃煥膚六部曲 送 凝萃煥膚安瓶">艾多美 凝萃煥膚六部曲 送 凝萃煥膚安瓶</option>
-					<option value="艾多美 髮根強健套組 送木梳">艾多美 髮根強健套組 送木梳</option>
-                    <!-- Add other health product options -->
-                </select></label>
+                <label>商品: 
+                    <select name="onsale_product[]">
+                        <option value="" selected>請選擇商品</option>
+                    </select>
+                </label>
                 <label>數量: <input type="number" name="onsale_quantity[]" min="1" placeholder="數量"></label>
+				        <button type="button" class="add-product-btn" onclick="addProductToSummary()">加入</button>
+
             </div>
         </div>
-        <!-- <button type="button" onclick="addProductRow('health')">添加健康食品</button><br><br> -->
 
-		<!-- Health Food Category -->
+        <!-- 健康食品 Category -->
         <h3>健康食品</h3>
         <div id="healthList">
             <div class="productRow">
-                <label>商品: <select name="health_product[]">
-                   	<option value="艾多美 蜂蜜飲4盒組共240包 (台灣帳號無法購買)">艾多美 蜂蜜飲4盒組共240包 (台灣帳號無法購買)</option>
-					<option value="艾多美 蜂蜜飲1盒組共120包 (台灣帳號無法購買)">艾多美 蜂蜜飲1盒組共120包 (台灣帳號無法購買)</option>
-					<option value="艾多美 酸櫻桃果凍">艾多美 酸櫻桃果凍</option>
-					<option value="艾多美 複合護眼素 護眼寶">艾多美 複合護眼素 護眼寶</option>
-					<option value="艾多美 牛奶鈣片120片">艾多美 牛奶鈣片120片</option>
-					<option value="艾多美 有機高麗菜汁 100ml 30包">艾多美 有機高麗菜汁 100ml 30包</option>
-					<option value="艾多美 車前子膳食纖維隨手包(45包)">艾多美 車前子膳食纖維隨手包(45包)</option>
-					<option value="艾多美 兒童維生素軟糖">艾多美 兒童維生素軟糖</option>
-					<option value="艾多美 紅石榴凍(60包) (台灣帳號無法購買)">艾多美 紅石榴凍(60包) (台灣帳號無法購買)</option>
-					<option value="艾多美 紅景天(120顆) (台灣帳號無法購買)">艾多美 紅景天(120顆) (台灣帳號無法購買)</option>
-					<option value="艾多美 紅蔘果凍條(30入)">艾多美 紅蔘果凍條(30入)</option>
-					<option value="艾多美 紅蔘微粒(60入) (台灣帳號無法購買)">艾多美 紅蔘微粒(60入) (台灣帳號無法購買)</option>
-					<option value="艾多美 益生菌 (120入) (台灣帳號無法購買)">艾多美 益生菌 (120入) (台灣帳號無法購買)</option>
-					<option value="艾多美 高濃度魚油膠囊 (台灣帳號無法購買)">艾多美 高濃度魚油膠囊 (台灣帳號無法購買)</option>
-					<option value="艾多美 普洱茶 (台灣帳號無法購買)">艾多美 普洱茶 (台灣帳號無法購買)</option>
-					<option value="艾多美 棕櫚果膠囊 男士寶(90顆)">艾多美 棕櫚果膠囊 男士寶(90顆)</option>
-					<option value="艾多美 葉黃素(台灣帳號無法購買)">艾多美 葉黃素(台灣帳號無法購買)</option>
-					<option value="艾多美 蜂膠口腔噴霧(30ml*3) (台灣帳號無法購買)">艾多美 蜂膠口腔噴霧(30ml*3) (台灣帳號無法購買)</option>
-					<option value="艾多美 綜合穀物飲 (台灣帳號無法購買)">艾多美 綜合穀物飲 (台灣帳號無法購買)</option>
-					<option value="艾多美 維生素C(90入) (台灣帳號無法購買)">艾多美 維生素C(90入) (台灣帳號無法購買)</option>
-					<option value="艾多美 銀杏納豆(60顆)">艾多美 銀杏納豆(60顆)</option>
-					<option value="艾多美 鳳梨酵素(30入)">艾多美 鳳梨酵素(30入)</option>
-					<option value="艾多美 諾麗果汁 (台灣帳號無法購買)">艾多美 諾麗果汁 (台灣帳號無法購買)</option>
-					<option value="艾多美 MSM薑黃錠">艾多美 MSM薑黃錠</option>
-					<option value="艾多美 螺旋藻膠囊 (台灣帳號無法購買)">艾多美 螺旋藻膠囊 (台灣帳號無法購買)</option>
-					<option value="艾多美 女性更年期專用槐花女王膠囊 玫瑰女士寶">艾多美 女性更年期專用槐花女王膠囊 玫瑰女士寶</option>
-					<option value="艾多美 綜合B群">艾多美 綜合B群</option>
-					<option value="艾多美 綜合鈣片 180粒">艾多美 綜合鈣片 180粒</option>
-					<option value="艾多美 膠原蛋白飲">艾多美 膠原蛋白飲</option>
-					<option value="艾多美 兒童魚油(120顆)">艾多美 兒童魚油(120顆)</option>
-					<option value="艾多美 檸檬葉酸(60顆)">艾多美 檸檬葉酸(60顆)</option>
-					<option value="艾多美 繽紛多彩蔬果綜合維生素(240顆)">艾多美 繽紛多彩蔬果綜合維生素(240顆)</option>
-					<option value="艾多美 鐵粉">艾多美 鐵粉</option>
-					<option value="艾多美 蘋果多酚果凍條 (台灣帳號無法購買)">艾多美 蘋果多酚果凍條 (台灣帳號無法購買)</option>
-					<option value="艾多美 蜂膠軟糖">艾多美 蜂膠軟糖</option>
-					<option value="艾多美 美容果凍-葡萄柚">艾多美 美容果凍-葡萄柚</option>
-					<option value="艾多美 美容果凍-蘆薈">艾多美 美容果凍-蘆薈</option>
-					<option value="艾多美 女性益生菌">艾多美 女性益生菌</option>
-					<option value="艾多美 牛奶睡眠肽">艾多美 牛奶睡眠肽</option>
-					<option value="艾多美 生物素">艾多美 生物素</option>
-					<option value="艾多美 超級維他命C 2000">艾多美 超級維他命C 2000</option>
-					<option value="艾多美 益腦片">艾多美 益腦片</option>
-					<option value="艾多美 胃健康日常護理">艾多美 胃健康日常護理</option>
-					<option value="艾多美 兒童紅蔘">艾多美 兒童紅蔘</option>
-					<option value="艾多美血糖護理-巴拿巴與紅蔘">艾多美血糖護理-巴拿巴與紅蔘</option>
-					<option value="艾多美 3倍蛋白粉">艾多美 3倍蛋白粉</option>
-					<option value="艾多美 美容果凍-百香果">艾多美 美容果凍-百香果</option>
-					<option value="艾多美紅蔘精華液">艾多美紅蔘精華液</option>
-					<option value="艾多美 rTG魚油">艾多美 rTG魚油</option>
-					<option value="艾多美 奶昔隨手包裝15包(可可) (台灣帳號無法購買)">艾多美 奶昔隨手包裝15包(可可) (台灣帳號無法購買)</option>
-					<option value="艾多美 奶昔隨手包裝15包(南瓜)">艾多美 奶昔隨手包裝15包(南瓜)</option>
-					<option value="艾多美 奶昔隨手包裝15包(原味) (台灣帳號無法購買)">艾多美 奶昔隨手包裝15包(原味) (台灣帳號無法購買)</option>
-					<option value="艾多美 奶昔隨手包裝15包(綠茶) (台灣帳號無法購買)">艾多美 奶昔隨手包裝15包(綠茶) (台灣帳號無法購買)</option>
-					<option value="艾多美 桔梗水梨榲桲濃縮果汁">艾多美 桔梗水梨榲桲濃縮果汁</option>
-					<option value="艾多美 綜合能量飲(30條)">艾多美 綜合能量飲(30條)</option>
-					<option value="艾多美 諾麗果汁隨身包 (24包) (台灣帳號無法購買)">艾多美 諾麗果汁隨身包 (24包) (台灣帳號無法購買)</option>
-					<option value="艾多美 人參地黃活力飲(30條)">艾多美 人參地黃活力飲(30條)</option>
-					<option value="艾多美 SCI腸道益生菌">艾多美 SCI腸道益生菌</option>
-					<option value="艾多美 洋蔥甜菜汁">艾多美 洋蔥甜菜汁</option>
-					<option value="艾多美 大象黑蒜汁">艾多美 大象黑蒜汁</option>
-					<option value="艾多美 rTG純素海藻omega3膠囊">艾多美 rTG純素海藻omega3膠囊</option>
-					<option value="艾多美 兒童益生菌">艾多美 兒童益生菌</option>
-					<option value="艾多美 大黃皇后膠囊">艾多美 大黃皇后膠囊</option>
-					<option value="艾多美 奶昔大包裝1200g (可可)">艾多美 奶昔大包裝1200g (可可)</option>
-					<option value="艾多美 奶昔大包裝1200g (南瓜)">艾多美 奶昔大包裝1200g (南瓜)</option>
-					<option value="艾多美 奶昔大包裝1200g (原味)">艾多美 奶昔大包裝1200g (原味)</option>
-					<option value="艾多美 奶昔大包裝1200g (綠茶)">艾多美 奶昔大包裝1200g (綠茶)</option>
-					<option value="艾多美 琉璃苣油">艾多美 琉璃苣油</option>
-					<option value="艾多美 綜合維他命">艾多美 綜合維他命</option>
-					<option value="艾多美 苦瓜萃取粉">艾多美 苦瓜萃取粉</option>
-                    <!-- Add other health product options -->
-                </select></label>
+                <label>商品: 
+                    <select name="health_product[]">
+                        <option value="" selected>請選擇商品</option>
+                    </select>
+                </label>
                 <label>數量: <input type="number" name="health_quantity[]" min="1" placeholder="數量"></label>
+				        <button type="button" class="add-product-btn" onclick="addProductToSummary()">加入</button>
+
             </div>
         </div>
-        <!-- <button type="button" onclick="addProductRow('health')">添加健康食品</button><br><br> -->
 
-
-        <!-- Skincare Category -->
+        <!-- 保養品 Category -->
         <h3>保養品</h3>
         <div id="skincareList">
             <div class="productRow">
-                <label>商品: <select name="skincare_product[]">
-                    <option value="艾多美 daily 面膜(01) 10片 保濕補水">艾多美 daily 面膜(01) 10片 保濕補水</option>
-					<option value="艾多美 daily 面膜(02) 10片 美白">艾多美 daily 面膜(02) 10片 美白</option>
-					<option value="艾多美 daily 面膜(03) 10片 補充營養彈性">艾多美 daily 面膜(03) 10片 補充營養彈性</option>
-					<option value="艾多美 360安瓶膠原蛋白氣墊粉餅01白皙 (1粉盒+2替換芯)">艾多美 360安瓶膠原蛋白氣墊粉餅01白皙 (1粉盒+2替換芯)</option>
-					<option value="艾多美 360安瓶膠原蛋白氣墊粉餅02自然(1粉盒+2替換芯)">艾多美 360安瓶膠原蛋白氣墊粉餅02自然(1粉盒+2替換芯)</option>
-					<option value="艾多美 360安瓶膠原蛋白氣墊粉餅03健康(1粉盒+2替換芯)">艾多美 360安瓶膠原蛋白氣墊粉餅03健康(1粉盒+2替換芯)</option>
-					<option value="艾多美 BB霜 4入組">艾多美 BB霜 4入組</option>
-					<option value="艾多美 BB霜 (台灣帳號無法購買)">艾多美 BB霜 (台灣帳號無法購買)</option>
-					<option value="艾多美 HOMME保濕防曬霜 1號">艾多美 HOMME保濕防曬霜 1號</option>
-					<option value="艾多美 HOMME保濕防曬霜 2號">艾多美 HOMME保濕防曬霜 2號</option>
-					<option value="艾多美 HOMME雙色精華液80ml">艾多美 HOMME雙色精華液80ml</option>
-					<option value="艾多美 HOMME護唇膏">艾多美 HOMME護唇膏</option>
-					<option value="艾多美 化妝棉片">艾多美 化妝棉片</option>
-					<option value="艾多美 全新黃金膠原蛋白氣墊粉餅粉撲 2入">艾多美 全新黃金膠原蛋白氣墊粉餅粉撲 2入</option>
-					<option value="艾多美 水凝膠安瓶眼膜">艾多美 水凝膠安瓶眼膜</option>
-					<option value="艾多美 粉餅粉撲 2入">艾多美 粉餅粉撲 2入</option>
-					<option value="艾多美 安瓶四週護理組+安瓶促進吸收按摩器套裝">艾多美 安瓶四週護理組+安瓶促進吸收按摩器套裝</option>
-					<option value="艾多美 安瓶促進吸收按摩器">艾多美 安瓶促進吸收按摩器</option>
-					<option value="艾多美 成人防曬棒(15g)">艾多美 成人防曬棒(15g)</option>
-					<option value="艾多美 兒童防曬乳(40ml)">艾多美 兒童防曬乳(40ml)</option>
-					<option value="艾多美 空氣粉餅(21)">艾多美 空氣粉餅(21)</option>
-					<option value="艾多美 空氣粉餅(23)">艾多美 空氣粉餅(23)</option>
-					<option value="艾多美 保濕五件組旅行包">艾多美 保濕五件組旅行包</option>
-					<option value="艾多美 保濕卸妝潔面濕巾(20張)">艾多美 保濕卸妝潔面濕巾(20張)</option>
-					<option value="艾多美 旅行組保濕眼霜單品(5入)">艾多美 旅行組保濕眼霜單品(5入)</option>
-					<option value="艾多美 旅行組保濕營養霜單品(5入)">艾多美 旅行組保濕營養霜單品(5入)</option>
-					<option value="艾多美 海洋安瓶美白保濕面膜(10片) 綠色包裝">艾多美 海洋安瓶美白保濕面膜(10片) 綠色包裝</option>
-					<option value="艾多美 海洋安瓶面膜舒緩保濕(10片) 藍色包裝">艾多美 海洋安瓶面膜舒緩保濕(10片) 藍色包裝</option>
-					<option value="艾多美 神經醯胺乳香嫩膚噴霧100ml">艾多美 神經醯胺乳香嫩膚噴霧100ml</option>
-					<option value="艾多美 凝萃煥采安瓶組">艾多美 凝萃煥采安瓶組</option>
-					<option value="艾多美 凝萃煥采安瓶組(4組)">艾多美 凝萃煥采安瓶組(4組)</option>
-					<option value="艾多美 HOMME男士精華液">艾多美 HOMME男士精華液</option>
-					<option value="艾多美 眼線筆 EYELINER(淺棕)">艾多美 眼線筆 EYELINER(淺棕)</option>
-					<option value="艾多美 眼線筆 EYELINER(深棕)">艾多美 眼線筆 EYELINER(深棕)</option>
-					<option value="艾多美 眼線筆 EYELINER(黑)">艾多美 眼線筆 EYELINER(黑)</option>
-					<option value="艾多美 終極抗痘抗粉刺四件組">艾多美 終極抗痘抗粉刺四件組</option>
-					<option value="艾多美 終極抗痘抗粉刺爽膚水">艾多美 終極抗痘抗粉刺爽膚水</option>
-					<option value="艾多美 終極抗痘抗粉刺精華乳">艾多美 終極抗痘抗粉刺精華乳</option>
-					<option value="艾多美 終極抗痘抗粉刺精華液">艾多美 終極抗痘抗粉刺精華液</option>
-					<option value="艾多美 終極抗痘抗粉刺潔面慕斯">艾多美 終極抗痘抗粉刺潔面慕斯</option>
-					<option value="艾多美 絕對防曬抗藍光控油氣墊粉餅補充芯">艾多美 絕對防曬抗藍光控油氣墊粉餅補充芯</option>
-					<option value="艾多美 微針除皺貼片">艾多美 微針除皺貼片</option>
-					<option value="艾多美 水嫩亮白精華液">艾多美 水嫩亮白精華液</option>
-					<option value="艾多美 水嫩亮白乳霜">艾多美 水嫩亮白乳霜</option>
-					<option value="艾多美 凝萃煥采安瓶組0號(保濕)4盒16入">艾多美 凝萃煥采安瓶組0號(保濕)4盒16入</option>
-					<option value="艾多美 凝萃煥采安瓶組0號(保濕)一盒4入">艾多美 凝萃煥采安瓶組0號(保濕)一盒4入</option>
-					<option value="艾多美 凝萃煥采安瓶組1號(美白)4盒16入">艾多美 凝萃煥采安瓶組1號(美白)4盒16入</option>
-					<option value="艾多美 凝萃煥采安瓶組1號(美白)一盒4入">艾多美 凝萃煥采安瓶組1號(美白)一盒4入</option>
-					<option value="艾多美 凝萃煥采安瓶組2號(金箔)4盒16入">艾多美 凝萃煥采安瓶組2號(金箔)4盒16入</option>
-					<option value="艾多美 凝萃煥采安瓶組2號(金箔)一盒4入">艾多美 凝萃煥采安瓶組2號(金箔)一盒4入</option>
-					<option value="艾多美 凝萃煥采安瓶組3號(逆齡)4盒16入">艾多美 凝萃煥采安瓶組3號(逆齡)4盒16入</option>
-					<option value="艾多美 凝萃煥采安瓶組3號(逆齡)一盒4入">艾多美 凝萃煥采安瓶組3號(逆齡)一盒4入</option>
-					<option value="艾多美 積雪草化妝水 120ml (台灣帳號無法購買)">艾多美 積雪草化妝水 120ml (台灣帳號無法購買)</option>
-					<option value="艾多美 積雪草安瓶 40ml (台灣帳號無法購買)">艾多美 積雪草安瓶 40ml (台灣帳號無法購買)</option>
-					<option value="艾多美 積雪草面霜 50ml (台灣帳號無法購買)">艾多美 積雪草面霜 50ml (台灣帳號無法購買)</option>
-					<option value="艾多美 積雪草潔面乳 150ml (台灣帳號無法購買)">艾多美 積雪草潔面乳 150ml (台灣帳號無法購買)</option>
-					<option value="艾多美 優雅淨白皮革化妝包">艾多美 優雅淨白皮革化妝包</option>
-					<option value="艾多美 優雅淨白刷具五件組">艾多美 優雅淨白刷具五件組</option>
-					<option value="艾多美 HOMME男士化妝水140ml">艾多美 HOMME男士化妝水140ml</option>
-					<option value="艾多美 HOMME男士精華液 (台灣帳號無法購買)">艾多美 HOMME男士精華液 (台灣帳號無法購買)</option>
-					<option value="艾多美 360安瓶膠原蛋白氣墊粉餅9入(01白皙)">艾多美 360安瓶膠原蛋白氣墊粉餅9入(01白皙)</option>
-					<option value="艾多美 360安瓶膠原蛋白氣墊粉餅9入(02自然)">艾多美 360安瓶膠原蛋白氣墊粉餅9入(02自然)</option>
-					<option value="艾多美 360安瓶膠原蛋白氣墊粉餅9入(03健康)">艾多美 360安瓶膠原蛋白氣墊粉餅9入(03健康)</option>
-					<option value="艾多美 絕對防曬抗藍光控油氣墊粉餅">艾多美 絕對防曬抗藍光控油氣墊粉餅</option>
-					<option value="艾多美 天然皂組">艾多美 天然皂組</option>
-					<option value="艾多美眼唇卸妝水">艾多美眼唇卸妝水</option>
-					<option value="艾多美 Adelica彩妝套組1 知性棕">艾多美 Adelica彩妝套組1 知性棕</option>
-					<option value="艾多美 Adelica彩妝套組2 可愛珊瑚紅">艾多美 Adelica彩妝套組2 可愛珊瑚紅</option>
-					<option value="艾多美 Adelica彩妝套組3 經典橄欖">艾多美 Adelica彩妝套組3 經典橄欖</option>
-					<option value="艾多美 Adelica彩妝套組4 羊絨酒紅">艾多美 Adelica彩妝套組4 羊絨酒紅</option>
-					<option value="艾多美 Adelica 3D立體修容粉餅">艾多美 Adelica 3D立體修容粉餅</option>
-					<option value="艾多美 Adelica LIP COLOR GLOW 粉樣唇膏 1. 紅色">艾多美 Adelica LIP COLOR GLOW 粉樣唇膏 1. 紅色</option>
-					<option value="艾多美 Adelica LIP COLOR GLOW 粉樣唇膏 2. 珊瑚紅">艾多美 Adelica LIP COLOR GLOW 粉樣唇膏 2. 珊瑚紅</option>
-					<option value="艾多美 Adelica LIP COLOR GLOW 粉樣唇膏 3. 粉色">艾多美 Adelica LIP COLOR GLOW 粉樣唇膏 3. 粉色</option>
-					<option value="艾多美 Adelica SOFT BROW PENCIL 軟眉筆 深棕色">艾多美 Adelica SOFT BROW PENCIL 軟眉筆 深棕色</option>
-					<option value="艾多美 Adelica SOFT BROW PENCIL 軟眉筆 淺棕色">艾多美 Adelica SOFT BROW PENCIL 軟眉筆 淺棕色</option>
-					<option value="艾多美 Adelica SOFT BROW PENCIL 軟眉筆 灰色">艾多美 Adelica SOFT BROW PENCIL 軟眉筆 灰色</option>
-					<option value="艾多美 Adelica BROWCARA 眉筆 深棕色">艾多美 Adelica BROWCARA 眉筆 深棕色</option>
-					<option value="艾多美 Adelica BROWCARA 眉筆 淺棕色">艾多美 Adelica BROWCARA 眉筆 淺棕色</option>
-					<option value="艾多美 Adelica BROWCARA 眉筆 灰色">艾多美 Adelica BROWCARA 眉筆 灰色</option>
-					<option value="艾多美 Adelica SLIM LINER PENCIL 眼線筆 黑色">艾多美 Adelica SLIM LINER PENCIL 眼線筆 黑色</option>
-					<option value="艾多美 Adelica SLIM LINER PENCIL 眼線筆 棕色">艾多美 Adelica SLIM LINER PENCIL 眼線筆 棕色</option>
-					<option value="艾多美 Adelica WATERPROOF MASCARA 防水睫毛膏 黑色">艾多美 Adelica WATERPROOF MASCARA 防水睫毛膏 黑色</option>
-					<option value="艾多美 Adelica LONG-LASH MASCARA 濃長睫毛膏">艾多美 Adelica LONG-LASH MASCARA 濃長睫毛膏</option>
-					<option value="艾多美 Adelica VOLUME MASCARA濃密睫毛膏">艾多美 Adelica VOLUME MASCARA濃密睫毛膏</option>
-					<option value="艾多美 Adelica EYE PALETTE 眼影 No.1 Daily Brown">艾多美 Adelica EYE PALETTE 眼影 No.1 Daily Brown</option>
-					<option value="艾多美 Adelica EYE PALETTE 眼影 No.2 Peach Carol">艾多美 Adelica EYE PALETTE 眼影 No.2 Peach Carol</option>
-					<option value="艾多美 Adelica EYE PALETTE 眼影 No.3 Olive Brown">艾多美 Adelica EYE PALETTE 眼影 No.3 Olive Brown</option>
-					<option value="艾多美 Adelica EYE PALETTE 眼影 No.4 Pink Burgundy">艾多美 Adelica EYE PALETTE 眼影 No.4 Pink Burgundy</option>
-					<option value="艾多美 Adelica SHEER COTTON BLUSH 腮紅 桃色">艾多美 Adelica SHEER COTTON BLUSH 腮紅 桃色</option>
-					<option value="艾多美 Adelica SHEER COTTON BLUSH 腮紅 玫瑰色">艾多美 Adelica SHEER COTTON BLUSH 腮紅 玫瑰色</option>
-					<option value="艾多美 Adelica BE-SLIM BRONZER 修容組">艾多美 Adelica BE-SLIM BRONZER 修容組</option>
-					<option value="艾多美 Adelica CONCEALER 遮瑕筆 (21)">艾多美 Adelica CONCEALER 遮瑕筆 (21)</option>
-					<option value="艾多美 Adelica CONCEALER 遮瑕筆 (23)">艾多美 Adelica CONCEALER 遮瑕筆 (23)</option>
-					<option value="艾多美 Adelica 化妝刷套組">艾多美 Adelica 化妝刷套組</option>
-					<option value="艾多美 Adelica 粉刷">艾多美 Adelica 粉刷</option>
-					<option value="艾多美 Adelica 腮紅刷">艾多美 Adelica 腮紅刷</option>
-					<option value="艾多美 Adelica 陰影刷">艾多美 Adelica 陰影刷</option>
-					<option value="艾多美 Adelica 混合眼刷">艾多美 Adelica 混合眼刷</option>
-					<option value="艾多美 Adelica 眼部塗抹刷">艾多美 Adelica 眼部塗抹刷</option>
-					<option value="艾多美 清潔四件組">艾多美 清潔四件組</option>
-					<option value="艾多美 Adelica 定妝雙色蜜粉 (台灣帳號無法購買)">艾多美 Adelica 定妝雙色蜜粉 (台灣帳號無法購買)</option>
-					<option value="艾多美 男士極效多合一精華">艾多美 男士極效多合一精華</option>
-					<option value="艾多美 凝萃精華油噴霧">艾多美 凝萃精華油噴霧</option>
-					<option value="艾多美 凝萃修復霜 一入">艾多美 凝萃修復霜 一入</option>
-					<option value="艾多美 凝萃修復霜 四入組 (台灣帳號無法購買)">艾多美 凝萃修復霜 四入組 (台灣帳號無法購買)</option>
-					<option value="艾多美 Adelica 經典唇膏 1號">艾多美 Adelica 經典唇膏 1號</option>
-					<option value="艾多美 Adelica 經典唇膏 2號">艾多美 Adelica 經典唇膏 2號</option>
-					<option value="艾多美 Adelica 經典唇膏 3號">艾多美 Adelica 經典唇膏 3號</option>
-					<option value="艾多美 Adelica 經典唇膏 4號">艾多美 Adelica 經典唇膏 4號</option>
-					<option value="艾多美 Adelica 經典唇膏 5號">艾多美 Adelica 經典唇膏 5號</option>
-					<option value="艾多美 Adelica 經典唇膏 6號">艾多美 Adelica 經典唇膏 6號</option>
-					<option value="艾多美 Adelica 經典唇膏 7號">艾多美 Adelica 經典唇膏 7號</option>
-					<option value="艾多美 Adelica Luminous Matt Cover Balm 遮瑕粉餅 1號">艾多美 Adelica Luminous Matt Cover Balm 遮瑕粉餅 1號</option>
-					<option value="艾多美 Adelica Luminous Matt Cover Balm 遮瑕粉餅 2號">艾多美 Adelica Luminous Matt Cover Balm 遮瑕粉餅 2號</option>
-					<option value="艾多美 防曬霜 米色">艾多美 防曬霜 米色</option>
-					<option value="艾多美 防曬霜 白色">艾多美 防曬霜 白色</option>
-					<option value="艾多美 凝萃雪白七件組">艾多美 凝萃雪白七件組</option>
-					<option value="艾多美 凝萃雪白五件組 (台灣帳號無法購買)">艾多美 凝萃雪白五件組 (台灣帳號無法購買)</option>
-					<option value="艾多美 HOMME男士保濕三件組">艾多美 HOMME男士保濕三件組</option>
-					<option value="艾多美 月桂保濕噴霧">艾多美 月桂保濕噴霧</option>
-					<option value="艾多美 玫瑰珠光隔離乳">艾多美 玫瑰珠光隔離乳</option>
-					<option value="艾多美 潤色護唇膏">艾多美 潤色護唇膏</option>
-					<option value="艾多美 空氣粉餅(21)">艾多美 空氣粉餅(21)</option>
-					<option value="艾多美 經典保養五件組">艾多美 經典保養五件組</option>
-					<option value="艾多美 保濕化妝水150ml">艾多美 保濕化妝水150ml</option>
-					<option value="艾多美 保濕乳液135ml">艾多美 保濕乳液135ml</option>
-					<option value="艾多美 保濕眼霜40ml">艾多美 保濕眼霜40ml</option>
-					<option value="艾多美 保濕精華液50ml">艾多美 保濕精華液50ml</option>
-					<option value="艾多美 保濕凝膠">艾多美 保濕凝膠</option>
-					<option value="艾多美 保濕營養霜50ml">艾多美 保濕營養霜50ml</option>
-					<option value="艾多美 敏感肌專用防曬棒">艾多美 敏感肌專用防曬棒</option>
-					<option value="艾多美 舒緩修護化妝水">艾多美 舒緩修護化妝水</option>
-					<option value="艾多美 舒緩修護精華液">艾多美 舒緩修護精華液</option>
-					<option value="艾多美 水嫩亮白兩件組">艾多美 水嫩亮白兩件組</option>
-					<option value="艾多美 凝粹防曬BB霜(13)">艾多美 凝粹防曬BB霜(13)</option>
-					<option value="艾多美 凝粹防曬BB霜(21)">艾多美 凝粹防曬BB霜(21)</option>
-					<option value="艾多美 凝粹防曬BB霜(23)">艾多美 凝粹防曬BB霜(23)</option>
-					<option value="艾多美 凝粹防曬乳 (台灣帳號無法購買)">艾多美 凝粹防曬乳 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝萃煥膚六部曲 (台灣帳號無法購買)">艾多美 凝萃煥膚六部曲 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝萃煥膚化妝水 (台灣帳號無法購買)">艾多美 凝萃煥膚化妝水 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝萃煥膚安瓶 (台灣帳號無法購買)">艾多美 凝萃煥膚安瓶 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝萃煥膚乳液 (台灣帳號無法購買)">艾多美 凝萃煥膚乳液 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝萃煥膚眼霜 (台灣帳號無法購買)">艾多美 凝萃煥膚眼霜 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝萃煥膚營養霜 (台灣帳號無法購買)">艾多美 凝萃煥膚營養霜 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝粹煥膚精華液 (台灣帳號無法購買)">艾多美 凝粹煥膚精華液 (台灣帳號無法購買)</option>
-					<option value="艾多美 HOMME男士乳液140ml">艾多美 HOMME男士乳液140ml</option>
-					<option value="艾多美 積雪草舒緩鎮定三件組">艾多美 積雪草舒緩鎮定三件組</option>
-					<option value="艾多美 有機精油套組">艾多美 有機精油套組</option>
-					<option value="艾多美 有機荷荷巴油">艾多美 有機荷荷巴油</option>
-					<option value="艾多美 凝萃雪白隔離霜 (台灣帳號無法購買)">艾多美 凝萃雪白隔離霜 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝萃雪白面膜 (台灣帳號無法購買)">艾多美 凝萃雪白面膜 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝萃雪白晚霜 (台灣帳號無法購買)">艾多美 凝萃雪白晚霜 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝萃雪白日霜 (台灣帳號無法購買)">艾多美 凝萃雪白日霜 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝萃雪白精華液 (台灣帳號無法購買)">艾多美 凝萃雪白精華液 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝萃雪白化妝水 (台灣帳號無法購買)">艾多美 凝萃雪白化妝水 (台灣帳號無法購買)</option>
-					<option value="艾多美 凝萃雪白淡斑修護精華 (台灣帳號無法購買)">艾多美 凝萃雪白淡斑修護精華 (台灣帳號無法購買)</option>
-					<option value="艾多美 Adelica 緞面唇膏 SATIN Dewy Coral">艾多美 Adelica 緞面唇膏 SATIN Dewy Coral</option>
-					<option value="艾多美 Adelica 緞面唇膏 SATIN Sweet Pink">艾多美 Adelica 緞面唇膏 SATIN Sweet Pink</option>
-					<option value="艾多美 Adelica 緞面唇膏 SATIN Raspberry">艾多美 Adelica 緞面唇膏 SATIN Raspberry</option>
-					<option value="艾多美 有機精油 薰衣草">艾多美 有機精油 薰衣草</option>
-					<option value="艾多美 有機精油 薄荷">艾多美 有機精油 薄荷</option>
-					<option value="艾多美 有機精油 檸檬">艾多美 有機精油 檸檬</option>
-					<option value="艾多美 遮瑕氣墊粉餅 1號">艾多美 遮瑕氣墊粉餅 1號</option>
-					<option value="艾多美 遮瑕氣墊粉餅 2號">艾多美 遮瑕氣墊粉餅 2號</option>
-					<option value="艾多美 遮瑕氣墊粉餅 3號">艾多美 遮瑕氣墊粉餅 3號</option>
-					<option value="艾多美 光亮水潤唇釉 1 櫻桃紅">艾多美 光亮水潤唇釉 1 櫻桃紅</option>
-					<option value="艾多美 光亮水潤唇釉 2 亮橙">艾多美 光亮水潤唇釉 2 亮橙</option>
-					<option value="艾多美 光亮水潤唇釉 3 霓虹粉">艾多美 光亮水潤唇釉 3 霓虹粉</option>
-					<option value="艾多美 光亮水潤唇釉 4 珊瑚楓">艾多美 光亮水潤唇釉 4 珊瑚楓</option>
-					<option value="艾多美 光亮水潤唇釉 5. 粉紫">艾多美 光亮水潤唇釉 5. 粉紫</option>
-					<option value="艾多美 光亮水潤唇釉 6 灰玫瑰">艾多美 光亮水潤唇釉 6 灰玫瑰</option>
-					<option value="艾多美凝萃煥膚 24K黃金晚安面膜">艾多美凝萃煥膚 24K黃金晚安面膜</option>
-					<option value="艾多美凝萃煥膚 24K黃金晚安面膜 三入組">艾多美凝萃煥膚 24K黃金晚安面膜 三入組</option>
-					<option value="艾多美凝萃煥膚 24K黃金晚安面膜 補充罐">艾多美凝萃煥膚 24K黃金晚安面膜 補充罐</option>
-					<option value="艾多美 防曬貼片">艾多美 防曬貼片</option>
-					<option value="艾多美 Adelica SHEER COTTON BLUSH 腮紅 粉色">艾多美 Adelica SHEER COTTON BLUSH 腮紅 粉色</option>
-					<option value="艾多美 凝萃煥膚面膜三入組">艾多美 凝萃煥膚面膜三入組</option>
-					<option value="艾多美 凝萃煥膚面膜 檜木泥士">艾多美 凝萃煥膚面膜 檜木泥士</option>
-					<option value="艾多美 凝萃煥膚面膜 法國玫瑰">艾多美 凝萃煥膚面膜 法國玫瑰</option>
-					<option value="艾多美 凝萃煥膚面膜 蜂蜜人參">艾多美 凝萃煥膚面膜 蜂蜜人參</option>
-					<option value="艾多美凝萃煥膚面膜刷">艾多美凝萃煥膚面膜刷</option>
-					<option value="艾多美 去角質棉">艾多美 去角質棉</option>
-					<option value="艾多美 去角質棉補充包">艾多美 去角質棉補充包</option>
-					<option value="艾多美 凝萃煥膚面膜 檜木泥士 補充罐">艾多美 凝萃煥膚面膜 檜木泥士 補充罐</option>
-					<option value="艾多美 凝萃煥膚面膜 法國玫瑰 補充罐">艾多美 凝萃煥膚面膜 法國玫瑰 補充罐</option>
-					<option value="艾多美 凝萃煥膚面膜 蜂蜜人參 補充罐">艾多美 凝萃煥膚面膜 蜂蜜人參 補充罐</option>
-					<option value="艾多美 Adelica 啞光唇膏 LIP ROUGE MATT 1紅色">艾多美 Adelica 啞光唇膏 LIP ROUGE MATT 1紅色</option>
-					<option value="艾多美 Adelica 啞光唇膏 LIP ROUGE MATT 2粉色">艾多美 Adelica 啞光唇膏 LIP ROUGE MATT 2粉色</option>
-					<option value="艾多美 Adelica 啞光唇膏 LIP ROUGE MATT 3玫瑰色">艾多美 Adelica 啞光唇膏 LIP ROUGE MATT 3玫瑰色</option>
-					<option value="艾多美 水嫩潤唇膏 (台灣帳號無法購買)">艾多美 水嫩潤唇膏 (台灣帳號無法購買)</option>
-					<option value="艾多美 全新黃金膠原蛋白氣墊粉餅 1號">艾多美 全新黃金膠原蛋白氣墊粉餅 1號</option>
-					<option value="艾多美 全新黃金膠原蛋白氣墊粉餅 2號">艾多美 全新黃金膠原蛋白氣墊粉餅 2號</option>
-					<option value="艾多美 全新黃金膠原蛋白氣墊粉餅 3號">艾多美 全新黃金膠原蛋白氣墊粉餅 3號</option>
-					<option value="艾多美 全新黃金膠原蛋白氣墊粉餅 4號">艾多美 全新黃金膠原蛋白氣墊粉餅 4號</option>
-					<option value="艾多美 全新黃金膠原蛋白氣墊粉餅 5號">艾多美 全新黃金膠原蛋白氣墊粉餅 5號</option>
-					<option value="艾多美 全新黃金膠原蛋白氣墊粉餅 三入組 1號">艾多美 全新黃金膠原蛋白氣墊粉餅 三入組 1號</option>
-					<option value="艾多美 全新黃金膠原蛋白氣墊粉餅 三入組 2號">艾多美 全新黃金膠原蛋白氣墊粉餅 三入組 2號</option>
-					<option value="艾多美 全新黃金膠原蛋白氣墊粉餅 三入組 3號">艾多美 全新黃金膠原蛋白氣墊粉餅 三入組 3號</option>
-					<option value="艾多美 全新黃金膠原蛋白氣墊粉餅 三入組 4號">艾多美 全新黃金膠原蛋白氣墊粉餅 三入組 4號</option>
-					<option value="艾多美 全新黃金膠原蛋白氣墊粉餅 三入組 5號">艾多美 全新黃金膠原蛋白氣墊粉餅 三入組 5號</option>
-					<option value="艾多美 Adelica Luminous Matt Cover Balm 遮瑕粉餅 1號補充包">艾多美 Adelica Luminous Matt Cover Balm 遮瑕粉餅 1號補充包</option>
-					<option value="艾多美 Adelica Luminous Matt Cover Balm 遮瑕粉餅 2號補充包">艾多美 Adelica Luminous Matt Cover Balm 遮瑕粉餅 2號補充包</option>
-					<option value="艾多美 清新防曬乳液">艾多美 清新防曬乳液</option>
-					<option value="艾多美 凝萃保濕霜">艾多美 凝萃保濕霜</option>
-					<option value="艾多美 凝萃保濕霜 四入組">艾多美 凝萃保濕霜 四入組</option>
-					<option value="艾多美 粉撲 2入">艾多美 粉撲 2入</option>
-					<option value="艾多美 玫瑰舒緩噴霧">艾多美 玫瑰舒緩噴霧</option>
-                    <!-- Add other skincare product options -->
-                </select></label>
+                <label>商品: 
+                    <select name="skincare_product[]">
+                        <option value="" selected>請選擇商品</option>
+                    </select>
+                </label>
                 <label>數量: <input type="number" name="skincare_quantity[]" min="1" placeholder="數量"></label>
+				        <button type="button" class="add-product-btn" onclick="addProductToSummary()">加入</button>
+
             </div>
         </div>
-        <!-- <button type="button" onclick="addProductRow('skincare')">添加保養品</button><br><br> -->
-		
-		<!-- body care Category -->
+
+        <!-- 身體髮膚 Category -->
         <h3>身體髮膚</h3>
         <div id="bodyList">
             <div class="productRow">
-                <label>商品: <select name="body_product[]">
-					<option value="艾多美 Homme 男士多功能洗面乳 (台灣帳號無法購買)">艾多美 Homme 男士多功能洗面乳 (台灣帳號無法購買)</option>
-					<option value="艾多美 Homme 男士洗髮沐浴露 500ml">艾多美 Homme 男士洗髮沐浴露 500ml</option>
-					<option value="艾多美 抗毛躁絲蛋白頭髮精華幕斯(乾溼皆可用) 155ml">艾多美 抗毛躁絲蛋白頭髮精華幕斯(乾溼皆可用) 155ml</option>
-					<option value="艾多美 泡泡染5號">艾多美 泡泡染5號</option>
-					<option value="艾多美 泡泡染6號">艾多美 泡泡染6號</option>
-					<option value="艾多美 泡泡染7號">艾多美 泡泡染7號</option>
-					<option value="艾多美 草本沐浴精">艾多美 草本沐浴精</option>
-					<option value="艾多美 草本沐浴精 4入組">艾多美 草本沐浴精 4入組</option>
-					<option value="艾多美 草本洗髮精">艾多美 草本洗髮精</option>
-					<option value="艾多美 草本洗髮精 4入組">艾多美 草本洗髮精 4入組</option>
-					<option value="艾多美 捲髮專用護髮素150ml">艾多美 捲髮專用護髮素150ml</option>
-					<option value="艾多美 蛋白密集型洗髮精">艾多美 蛋白密集型洗髮精</option>
-					<option value="艾多美 蛋白密集型護髮兩件組">艾多美 蛋白密集型護髮兩件組</option>
-					<option value="艾多美 蛋白密集型護髮素">艾多美 蛋白密集型護髮素</option>
-					<option value="艾多美 極致豐盈沐浴乳">艾多美 極致豐盈沐浴乳</option>
-					<option value="艾多美 極致豐盈身體乳">艾多美 極致豐盈身體乳</option>
-					<option value="艾多美 頭皮調理潤髮乳">艾多美 頭皮調理潤髮乳</option>
-					<option value="艾多美 頭皮護理兩件組(舒爽洗髮露+頭皮調理護髮素)">艾多美 頭皮護理兩件組(舒爽洗髮露+頭皮調理護髮素)</option>
-					<option value="艾多美 護手霜">艾多美 護手霜</option>
-					<option value="艾多美 蛋白密集型洗護髮三件組">艾多美 蛋白密集型洗護髮三件組</option>
-					<option value="艾多美 柔護寶貝三件組">艾多美 柔護寶貝三件組</option>
-					<option value="艾多美 凝粹護髮素">艾多美 凝粹護髮素</option>
-					<option value="艾多美 男士髮蠟">艾多美 男士髮蠟</option>
-					<option value="艾多美 柔護寶貝洗髮沐浴露">艾多美 柔護寶貝洗髮沐浴露</option>
-					<option value="艾多美 柔護寶貝保濕乳霜">艾多美 柔護寶貝保濕乳霜</option>
-					<option value="艾多美 柔護寶貝潤膚乳">艾多美 柔護寶貝潤膚乳</option>
-					<option value="艾多美 沙龍染髮劑 2C 玫瑰棕">艾多美 沙龍染髮劑 2C 玫瑰棕</option>
-					<option value="艾多美 沙龍染髮劑 3C 黃金棕">艾多美 沙龍染髮劑 3C 黃金棕</option>
-					<option value="艾多美 沙龍染髮劑 4C 珊瑚棕">艾多美 沙龍染髮劑 4C 珊瑚棕</option>
-					<option value="艾多美 沙龍染髮劑 5G 棕色">艾多美 沙龍染髮劑 5G 棕色</option>
-					<option value="艾多美 沙龍染髮劑 6G 深棕色">艾多美 沙龍染髮劑 6G 深棕色</option>
-					<option value="艾多美 沙龍染髮劑 7G 黑色">艾多美 沙龍染髮劑 7G 黑色</option>
-					<option value="艾多美兒童天然牙膏">艾多美兒童天然牙膏</option>
-					<option value="艾多美沐浴旅行組">艾多美沐浴旅行組</option>
-					<option value="艾多美 糖身體磨砂膏">艾多美 糖身體磨砂膏</option>
-					<option value="艾多美 護髮油 (台灣帳號無法購買)">艾多美 護髮油 (台灣帳號無法購買)</option>
-					<option value="艾多美 足部磨砂膏">艾多美 足部磨砂膏</option>
-					<option value="艾多美 足部滋養霜">艾多美 足部滋養霜</option>
-					<option value="艾多美 足部護理組">艾多美 足部護理組</option>
-					<option value="艾多美 抗敏感牙膏(100g 三入)">艾多美 抗敏感牙膏(100g 三入)</option>
-					<option value="艾多美 舌苔清潔棒">艾多美 舌苔清潔棒</option>
-					<option value="艾多美 孕期護理套組">艾多美 孕期護理套組</option>
-					<option value="艾多美 孕期彈力護膚霜">艾多美 孕期彈力護膚霜</option>
-					<option value="艾多美 孕期身體護理油">艾多美 孕期身體護理油</option>
-					<option value="艾多美 護手霜四件組">艾多美 護手霜四件組</option>
-					<option value="艾多美 弱酸皂">艾多美 弱酸皂</option>
-					<option value="艾多美 鹽身體磨砂膏">艾多美 鹽身體磨砂膏</option>
-					<option value="艾多美 女性私密處清潔慕斯">艾多美 女性私密處清潔慕斯</option>
-					<option value="艾多美 護手霜 三入組">艾多美 護手霜 三入組</option>
-					<option value="艾多美 護手霜 MARINE">艾多美 護手霜 MARINE</option>
-					<option value="艾多美 護手霜 PURE">艾多美 護手霜 PURE</option>
-					<option value="艾多美 護手霜 BUTTER">艾多美 護手霜 BUTTER</option>
-					<option value="艾多美 亮白薄荷牙膏(150g 三入)">艾多美 亮白薄荷牙膏(150g 三入)</option>
-					<option value="艾多美 髮根強健套組">艾多美 髮根強健套組</option>
-					<option value="艾多美 髮根強健洗髮精">艾多美 髮根強健洗髮精</option>
-					<option value="艾多美 髮根強健髮膜">艾多美 髮根強健髮膜</option>
-					<option value="艾多美 髮根強健安瓶">艾多美 髮根強健安瓶</option>
-					<option value="艾多美 髮根強健安瓶 三入組">艾多美 髮根強健安瓶 三入組</option>
-					<option value="艾多美 髮根強健加強套組">艾多美 髮根強健加強套組</option>
-					<option value="艾多美 沙龍髮根染髮劑 3C 黃金棕 一盒四劑">艾多美 沙龍髮根染髮劑 3C 黃金棕 一盒四劑</option>
-					<option value="艾多美 沙龍髮根染髮劑 5G 棕色 一盒四劑">艾多美 沙龍髮根染髮劑 5G 棕色 一盒四劑</option>
-					<option value="艾多美 沙龍髮根染髮劑 6G 深棕色 一盒四劑">艾多美 沙龍髮根染髮劑 6G 深棕色 一盒四劑</option>
-                    <!-- Add other body product options -->
-                </select></label>
+                <label>商品: 
+                    <select name="body_product[]">
+                        <option value="" selected>請選擇商品</option>
+                    </select>
+                </label>
                 <label>數量: <input type="number" name="body_quantity[]" min="1" placeholder="數量"></label>
+				        <button type="button" class="add-product-btn" onclick="addProductToSummary()">加入</button>
+
             </div>
         </div>
-		
-		<!-- living Category -->
+
+        <!-- 生活用品 Category -->
         <h3>生活用品</h3>
         <div id="livingList">
             <div class="productRow">
-                <label>商品: <select name="living_product[]">
-					<option value="艾多美 濾水壺 中">艾多美 濾水壺 中</option>
-					<option value="艾多美 濾水壺 大">艾多美 濾水壺 大</option>
-					<option value="艾多美 20cm*100M切割式保鮮膜">艾多美 20cm*100M切割式保鮮膜</option>
-					<option value="艾多美 22cm不鏽鋼平底鍋">艾多美 22cm不鏽鋼平底鍋</option>
-					<option value="艾多美 28cm不鏽鋼平底鍋">艾多美 28cm不鏽鋼平底鍋</option>
-					<option value="艾多美 68.9%酒精抗菌配方居家消毒噴霧 500ml">艾多美 68.9%酒精抗菌配方居家消毒噴霧 500ml</option>
-					<option value="艾多美 KF80兒童防塵防霧霾口罩">艾多美 KF80兒童防塵防霧霾口罩</option>
-					<option value="艾多美 KF94兒童防塵防霧霾口罩">艾多美 KF94兒童防塵防霧霾口罩</option>
-					<option value="艾多美 SlimBody水杯">艾多美 SlimBody水杯</option>
-					<option value="艾多美 可彎重複使用型牙間刷SS(16支)">艾多美 可彎重複使用型牙間刷SS(16支)</option>
-					<option value="艾多美 可彎重複使用型牙間刷SSSS(16支)">艾多美 可彎重複使用型牙間刷SSSS(16支)</option>
-					<option value="艾多美 乳膠枕L">艾多美 乳膠枕L</option>
-					<option value="艾多美 乳膠枕M">艾多美 乳膠枕M</option>
-					<option value="艾多美 乳膠枕S">艾多美 乳膠枕S</option>
-					<option value="艾多美 拋棄式衛生手套110入">艾多美 拋棄式衛生手套110入</option>
-					<option value="艾多美 枕頭套L(白色)">艾多美 枕頭套L(白色)</option>
-					<option value="艾多美 枕頭套L(灰色)">艾多美 枕頭套L(灰色)</option>
-					<option value="艾多美 枕頭套M(白色)">艾多美 枕頭套M(白色)</option>
-					<option value="艾多美 枕頭套M(灰色)">艾多美 枕頭套M(灰色)</option>
-					<option value="艾多美 枕頭套S(白色)">艾多美 枕頭套S(白色)</option>
-					<option value="艾多美 枕頭套S(灰色)">艾多美 枕頭套S(灰色)</option>
-					<option value="艾多美 保溫隨行杯 420ml">艾多美 保溫隨行杯 420ml</option>
-					<option value="艾多美 保鮮夾鏈袋(18*20cm)22入 (小)">艾多美 保鮮夾鏈袋(18*20cm)22入 (小)</option>
-					<option value="艾多美 保鮮夾鏈袋(25*30cm)22入 (大)">艾多美 保鮮夾鏈袋(25*30cm)22入 (大)</option>
-					<option value="艾多美 保鮮膜30*10000cm">艾多美 保鮮膜30*10000cm</option>
-					<option value="艾多美 夏日冷飲隨手杯500ml">艾多美 夏日冷飲隨手杯500ml</option>
-					<option value="艾多美 浴室清潔劑600ml*2 一組">艾多美 浴室清潔劑600ml*2 一組</option>
-					<option value="艾多美 無封口保鮮袋(17*25cm)110入 (小)">艾多美 無封口保鮮袋(17*25cm)110入 (小)</option>
-					<option value="艾多美 無封口保鮮袋(25*35cm)110入 (中)">艾多美 無封口保鮮袋(25*35cm)110入 (中)</option>
-					<option value="艾多美 無封口保鮮袋(30*40cm)110入 (大)">艾多美 無封口保鮮袋(30*40cm)110入 (大)</option>
-					<option value="艾多美 飯店級長款毛巾(3入) 白色">艾多美 飯店級長款毛巾(3入) 白色</option>
-					<option value="艾多美 滾筒式清潔組(三捲+刷具)黏地板牆壁寵物毛髮">艾多美 滾筒式清潔組(三捲+刷具)黏地板牆壁寵物毛髮</option>
-					<option value="艾多美 滾筒黏貼清潔組(滾筒掃把1+替換芯5)">艾多美 滾筒黏貼清潔組(滾筒掃把1+替換芯5)</option>
-					<option value="艾多美 維他命C過濾器 無香味">艾多美 維他命C過濾器 無香味</option>
-					<option value="艾多美 維他命C過濾器 檸檬香">艾多美 維他命C過濾器 檸檬香</option>
-					<option value="艾多美 維他命C蓮蓬頭">艾多美 維他命C蓮蓬頭</option>
-					<option value="艾多美 廚房清潔劑600ml*2 一組">艾多美 廚房清潔劑600ml*2 一組</option>
-					<option value="艾多美 潔淨沐浴手套">艾多美 潔淨沐浴手套</option>
-					<option value="艾多美 蔬果餐具清潔液1kg">艾多美 蔬果餐具清潔液1kg</option>
-					<option value="艾多美 濕紙巾20抽3入(隨行包)">艾多美 濕紙巾20抽3入(隨行包)</option>
-					<option value="艾多美 濕紙巾70抽8入">艾多美 濕紙巾70抽8入</option>
-					<option value="艾多美 擴香禮盒-1">艾多美 擴香禮盒-1</option>
-					<option value="艾多美 擴香禮盒-1">艾多美 擴香禮盒-1</option>
-					<option value="艾多美 擴香禮盒-1">艾多美 擴香禮盒-1</option>
-					<option value="艾多美 擴香禮盒-1">艾多美 擴香禮盒-1</option>
-					<option value="艾多美 擴香禮盒-1">艾多美 擴香禮盒-1</option>
-					<option value="艾多美 狗狗乾糧">艾多美 狗狗乾糧</option>
-					<option value="艾多美 狗狗乾糧">艾多美 狗狗乾糧</option>
-					<option value="艾多美 保濕抗菌乾洗手(500ml家庭號)">艾多美 保濕抗菌乾洗手(500ml家庭號)</option>
-					<option value="艾多美 保濕抗菌乾洗手(50ml*3便攜組)">艾多美 保濕抗菌乾洗手(50ml*3便攜組)</option>
-					<option value="艾多美 洗衣紙 (30入)">艾多美 洗衣紙 (30入)</option>
-					<option value="艾多美 家事清潔乳膠手套(L)">艾多美 家事清潔乳膠手套(L)</option>
-					<option value="艾多美 雜質過濾濾心">艾多美 雜質過濾濾心</option>
-					<option value="艾多美 寵物潔牙棒 螺旋藻">艾多美 寵物潔牙棒 螺旋藻</option>
-					<option value="艾多美 寵物潔牙棒 蔓越莓">艾多美 寵物潔牙棒 蔓越莓</option>
-					<option value="艾多美 寵物潔牙棒 甘藷">艾多美 寵物潔牙棒 甘藷</option>
-					<option value="艾多美 飯店級長款毛巾(3入) 駝色">艾多美 飯店級長款毛巾(3入) 駝色</option>
-					<option value="艾多美 飯店級長款毛巾(3入) 灰色">艾多美 飯店級長款毛巾(3入) 灰色</option>
-					<option value="艾多美 飯店級長款毛巾(3入) 紫色">艾多美 飯店級長款毛巾(3入) 紫色</option>
-					<option value="艾多美 O2潔白洗衣粉">艾多美 O2潔白洗衣粉</option>
-					<option value="艾多美 除濕乾燥劑">艾多美 除濕乾燥劑</option>
-					<option value="艾多美 兒童牙刷">艾多美 兒童牙刷</option>
-					<option value="艾多美 滾筒式清潔組補充包">艾多美 滾筒式清潔組補充包</option>
-					<option value="艾多美 滾筒式清潔組滾筒掃把補充包">艾多美 滾筒式清潔組滾筒掃把補充包</option>
-					<option value="艾多美 抗菌消毒除臭噴霧">艾多美 抗菌消毒除臭噴霧</option>
-					<option value="艾多美 蜂膠牙膏200g5入 (台灣帳號無法購買)">艾多美 蜂膠牙膏200g5入 (台灣帳號無法購買)</option>
-					<option value="艾多美 蜂膠牙膏50g4入 (台灣帳號無法購買)">艾多美 蜂膠牙膏50g4入 (台灣帳號無法購買)</option>
-					<option value="艾多美 Air-Fit 口罩 3入 M">艾多美 Air-Fit 口罩 3入 M</option>
-					<option value="艾多美 Air-Fit 口罩 3入 L">艾多美 Air-Fit 口罩 3入 L</option>
-					<option value="艾多美 濾水壺濾心">艾多美 濾水壺濾心</option>
-					<option value="艾多美 擴香禮盒-2 花香">艾多美 擴香禮盒-2 花香</option>
-					<option value="艾多美 擴香禮盒-2 果香">艾多美 擴香禮盒-2 果香</option>
-					<option value="艾多美 擴香禮盒-2 海洋">艾多美 擴香禮盒-2 海洋</option>
-					<option value="艾多美 衣物去汙劑">艾多美 衣物去汙劑</option>
-					<option value="艾多美 衣物去汙劑 補充包">艾多美 衣物去汙劑 補充包</option>
-					<option value="艾多美 衣物去汙劑組">艾多美 衣物去汙劑組</option>
-					<option value="艾多美 攜帶式漱口水 50入">艾多美 攜帶式漱口水 50入</option>
-					<option value="艾多美 瓶裝漱口水 800ml">艾多美 瓶裝漱口水 800ml</option>
-					<option value="艾多美 陶瓷平底鍋24cm">艾多美 陶瓷平底鍋24cm</option>
-					<option value="艾多美 陶瓷平底鍋28cm">艾多美 陶瓷平底鍋28cm</option>
-					<option value="艾多美 陶瓷炒鍋28cm">艾多美 陶瓷炒鍋28cm</option>
-					<option value="艾多美 陶瓷鍋鍋蓋28cm">艾多美 陶瓷鍋鍋蓋28cm</option>
-					<option value="艾多美 陶瓷鍋專用菜瓜布">艾多美 陶瓷鍋專用菜瓜布</option>
-					<option value="艾多美 洗衣膠囊（100入）">艾多美 洗衣膠囊（100入）</option>
-                    <!-- Add other living product options -->
-                </select></label>
+                <label>商品: 
+                    <select name="living_product[]">
+                        <option value="" selected>請選擇商品</option>
+                    </select>
+                </label>
                 <label>數量: <input type="number" name="living_quantity[]" min="1" placeholder="數量"></label>
+				        <button type="button" class="add-product-btn" onclick="addProductToSummary()">加入</button>
+
             </div>
         </div>
-		
-		<!-- Food Category -->
+
+        <!-- 吃吃喝喝 Category -->
         <h3>吃吃喝喝</h3>
         <div id="foodList">
             <div class="productRow">
-                <label>商品: <select name="food_product[]">
-					<option value="艾多美 阿拉比卡黑咖啡迷你包">艾多美 阿拉比卡黑咖啡迷你包</option>
-					<option value="艾多美 100%頂級酪梨油500ml">艾多美 100%頂級酪梨油500ml</option>
-					<option value="人參雞湯1kg(2包)">人參雞湯1kg(2包)</option>
-					<option value="艾多美 小魚乾250g(小)">艾多美 小魚乾250g(小)</option>
-					<option value="艾多美 小魚乾350g(大)">艾多美 小魚乾350g(大)</option>
-					<option value="艾多美 切段海帶150g">艾多美 切段海帶150g</option>
-					<option value="艾多美 木醣醇口香糖">艾多美 木醣醇口香糖</option>
-					<option value="艾多美 9次烘烤竹鹽 250g">艾多美 9次烘烤竹鹽 250g</option>
-					<option value="有機米餅(洋蔥)">有機米餅(洋蔥)</option>
-					<option value="有機米餅(原味)">有機米餅(原味)</option>
-					<option value="艾多美 有機米餅整箱24包(原味)">艾多美 有機米餅整箱24包(原味)</option>
-					<option value="艾多美 有機米餅整箱24包(洋蔥)">艾多美 有機米餅整箱24包(洋蔥)</option>
-					<option value="艾多美 有機剝殼栗子50g(3包)">艾多美 有機剝殼栗子50g(3包)</option>
-					<option value="艾多美 有機綠茶">艾多美 有機綠茶</option>
-					<option value="艾多美 有機礦物質原糖500g(2包)">艾多美 有機礦物質原糖500g(2包)</option>
-					<option value="艾多美 羊羹禮盒(15個)">艾多美 羊羹禮盒(15個)</option>
-					<option value="艾多美 冷粹咖啡禮盒 (肯亞咖啡色*2/紫色包裝*2/咖啡色*1+紫色*1)">艾多美 冷粹咖啡禮盒 (肯亞咖啡色*2/紫色包裝*2/咖啡色*1+紫色*1)</option>
-					<option value="艾多美 冷粹咖啡禮盒 (肯亞咖啡色*2/紫色包裝*2/咖啡色*1+紫色*1)">艾多美 冷粹咖啡禮盒 (肯亞咖啡色*2/紫色包裝*2/咖啡色*1+紫色*1)</option>
-					<option value="艾多美 冷粹咖啡禮盒 (肯亞咖啡色*2/紫色包裝*2/咖啡色*1+紫色*1)">艾多美 冷粹咖啡禮盒 (肯亞咖啡色*2/紫色包裝*2/咖啡色*1+紫色*1)</option>
-					<option value="豆腐餅(80g 3入)">豆腐餅(80g 3入)</option>
-					<option value="艾多美 芝麻油">艾多美 芝麻油</option>
-					<option value="柳橙汁180ml(10入)">柳橙汁180ml(10入)</option>
-					<option value="艾多美 海帶絲80g">艾多美 海帶絲80g</option>
-					<option value="艾多美 海鮮高湯包(15入)">艾多美 海鮮高湯包(15入)</option>
-					<option value="艾多美 有機玉米餅">艾多美 有機玉米餅</option>
-					<option value="雪濃湯600ml(3包)">雪濃湯600ml(3包)</option>
-					<option value="單品罐裝拿鐵30罐">單品罐裝拿鐵30罐</option>
-					<option value="艾多美 紫蘇油">艾多美 紫蘇油</option>
-					<option value="艾多美 葡萄柚汁 180ml / 10入">艾多美 葡萄柚汁 180ml / 10入</option>
-					<option value="艾多美 辣椒醬 1kg">艾多美 辣椒醬 1kg</option>
-					<option value="艾多美 螺肉罐頭">艾多美 螺肉罐頭</option>
-					<option value="艾多美 鍋粑餅(12包入)">艾多美 鍋粑餅(12包入)</option>
-					<option value="艾多美 藝伎冷萃咖啡 紫色包裝">艾多美 藝伎冷萃咖啡 紫色包裝</option>
-					<option value="艾多美 有機玉米餅(箱/24包) 原味">艾多美 有機玉米餅(箱/24包) 原味</option>
-					<option value="艾多美 肯亞冷萃咖啡 褐色包裝">艾多美 肯亞冷萃咖啡 褐色包裝</option>
-					<option value="艾多美 馬鈴薯蔬菜拉麵(不辣)一箱24包">艾多美 馬鈴薯蔬菜拉麵(不辣)一箱24包</option>
-					<option value="艾多美 葡萄籽油500ml *2">艾多美 葡萄籽油500ml *2</option>
-					<option value="艾多美 咖哩調理包">艾多美 咖哩調理包</option>
-					<option value="艾多美 ABC果汁">艾多美 ABC果汁</option>
-					<option value="艾多美 火腿罐頭 (3入)">艾多美 火腿罐頭 (3入)</option>
-					<option value="艾多美 有機玉米餅(箱/24包) 蜂蜜奶油口味">艾多美 有機玉米餅(箱/24包) 蜂蜜奶油口味</option>
-					<option value="艾多美 9次烘烤竹鹽粉">艾多美 9次烘烤竹鹽粉</option>
-					<option value="艾多美 大洋燕麥粉">艾多美 大洋燕麥粉</option>
-					<option value="艾多美 牛奶巧克力球">艾多美 牛奶巧克力球</option>
-					<option value="艾多美 黑巧克力球">艾多美 黑巧克力球</option>
-					<option value="艾多美清涼薄荷糖">艾多美清涼薄荷糖</option>
-					<option value="艾多美清涼蜜桃糖">艾多美清涼蜜桃糖</option>
-					<option value="艾多美 馬鈴薯辣味乾拌麵 十包入">艾多美 馬鈴薯辣味乾拌麵 十包入</option>
-					<option value="艾多美 黑胡椒粒">艾多美 黑胡椒粒</option>
-					<option value="艾多美 白胡椒粒">艾多美 白胡椒粒</option>
-					<option value="艾多美 無糖二合一咖啡">艾多美 無糖二合一咖啡</option>
-					<option value="艾多美 綜合茶 柚香">艾多美 綜合茶 柚香</option>
-					<option value="艾多美 綜合茶 南瓜">艾多美 綜合茶 南瓜</option>
-					<option value="艾多美 綜合茶 薰衣草">艾多美 綜合茶 薰衣草</option>
-                    <!-- Add other food product options -->
-                </select></label>
+                <label>商品: 
+                    <select name="food_product[]">
+                        <option value="" selected>請選擇商品</option>
+                    </select>
+                </label>
                 <label>數量: <input type="number" name="food_quantity[]" min="1" placeholder="數量"></label>
+				        <button type="button" class="add-product-btn" onclick="addProductToSummary()">加入</button>
+
             </div>
         </div>
-		
-		<!-- man Category --
-        <h3>健康食品</h3>
-        <div id="manList">
-            <div class="productRow">
-                <label>商品: <select name="man_product[]">
-                   	<option value="艾多美 蜂蜜飲4盒組共240包 (台灣帳號無法購買)">艾多美 蜂蜜飲4盒組共240包 (台灣帳號無法購買)</option>
 
-                    <!-- Add other man product options --
-                </select></label>
-                <label>數量: <input type="number" name="health_quantity[]" min="1" placeholder="數量"></label>
-            </div>
-        </div>
-		
-		<!-- woman Category --
-        <h3>健康食品</h3>
-        <div id="womanList">
-            <div class="productRow">
-                <label>商品: <select name="woman_product[]">
-                   	<option value="艾多美 蜂蜜飲4盒組共240包 (台灣帳號無法購買)">艾多美 蜂蜜飲4盒組共240包 (台灣帳號無法購買)</option>
-
-                    <!-- Add other woman product options --
-                </select></label>
-                <label>數量: <input type="number" name="health_quantity[]" min="1" placeholder="數量"></label>
-            </div>
-        </div> -->
-
-<button type="submit" id="submitButton">提交訂單</button>
-		
+        <button type="submit" id="submitButton">提交訂單</button>
     </form>
-
 </body>
 </html>
